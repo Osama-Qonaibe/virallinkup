@@ -8,6 +8,7 @@ import {
   Menu, X, Globe, ChevronDown, User, LogOut, LayoutDashboard,
   ShoppingCart, Heart, Shield
 } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 export default function SiteHeader() {
   const {
@@ -75,6 +76,9 @@ export default function SiteHeader() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            {/* Notification Bell */}
+            <NotificationBell />
+
             {/* Language Toggle */}
             <button
               onClick={toggleLang}

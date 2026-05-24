@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { notifyPurchase } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,6 +26,14 @@ export async function POST(request: NextRequest) {
       where: { id: productId },
       data: { downloads: { increment: 1 } },
     });
+
+    // Send purchase notification (non-blocking)
+    notifyPurchase(
+      userId,
+      product.title,
+      product.titleEn || product.title,
+      product.price,
+    ).catch(() => {});
 
     return NextResponse.json(order);
   } catch (error) {

@@ -25,7 +25,8 @@ export type PageName =
   | 'admin-settings'
   | 'admin-pages'
   | 'admin-testimonials'
-  | 'admin-categories';
+  | 'admin-categories'
+  | 'admin-email';
 
 export type Language = 'ar' | 'en';
 
@@ -49,6 +50,7 @@ interface AppState {
   selectedLegalPage: string | null;
   showDepositModal: boolean;
   _isRestored: boolean;
+  unreadNotifications: number;
 
   setCurrentPage: (page: PageName) => void;
   setCurrentLang: (lang: Language) => void;
@@ -60,6 +62,7 @@ interface AppState {
   setShowDepositModal: (show: boolean) => void;
   logout: () => void;
   setRestored: () => void;
+  setUnreadNotifications: (count: number) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -74,6 +77,7 @@ export const useAppStore = create<AppState>()(
       selectedLegalPage: null,
       showDepositModal: false,
       _isRestored: false,
+      unreadNotifications: 0,
 
       setCurrentPage: (page) => set({ currentPage: page }),
       setCurrentLang: (lang) => set({ currentLang: lang }),
@@ -83,8 +87,9 @@ export const useAppStore = create<AppState>()(
       setSelectedCategorySlug: (slug) => set({ selectedCategorySlug: slug }),
       setSelectedLegalPage: (slug) => set({ selectedLegalPage: slug }),
       setShowDepositModal: (show) => set({ showDepositModal: show }),
-      logout: () => set({ user: null, isAdmin: false, currentPage: 'landing' }),
+      logout: () => set({ user: null, isAdmin: false, currentPage: 'landing', unreadNotifications: 0 }),
       setRestored: () => set({ _isRestored: true }),
+      setUnreadNotifications: (count) => set({ unreadNotifications: count }),
     }),
     {
       name: 'virallinkup-store',

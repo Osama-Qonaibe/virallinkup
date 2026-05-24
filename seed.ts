@@ -170,6 +170,217 @@ async function seed() {
   }
   console.log('Settings created');
 
+  // ============================================
+  // Seed Default Email Templates
+  // ============================================
+  const emailTemplates = [
+    {
+      key: 'welcome',
+      subject: 'مرحباً بك في فيرال لينك أب',
+      subjectEn: 'Welcome to ViralLinkUp',
+      bodyHtml: `<h2 style="color:#F61A5A;font-size:22px;margin-bottom:16px;">مرحباً {{name}} 👋</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:16px;">يسعدنا انضمامك إلى منصة <strong style="color:#F61A5A;">فيرال لينك أب</strong>. نحن هنا لتقديم أفضل المنتجات الرقمية الاحترافية.</p>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">استكشف مكتبتنا الواسعة من القوالب والأدوات والموارد الرقمية المصممة لتسريع عملك.</p>
+<div style="text-align:center;padding:24px;background:rgba(246,26,90,0.1);border-radius:12px;border:1px solid rgba(246,26,90,0.2);margin-bottom:20px;">
+  <p style="color:#B4CDD3;font-size:13px;margin:0;">ابدأ الآن</p>
+  <p style="color:#F61A5A;font-size:20px;font-weight:bold;margin:8px 0 0 0;">اكتشف المنتجات</p>
+</div>
+<p style="color:#8888A0;font-size:13px;">إذا لم تقم بإنشاء هذا الحساب، يمكنك تجاهل هذه الرسالة.</p>`,
+      bodyHtmlEn: `<h2 style="color:#F61A5A;font-size:22px;margin-bottom:16px;">Welcome {{name}} 👋</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:16px;">We're excited to have you join <strong style="color:#F61A5A;">ViralLinkUp</strong>. We're here to provide the best professional digital products.</p>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">Explore our extensive library of templates, tools, and digital resources designed to accelerate your work.</p>
+<div style="text-align:center;padding:24px;background:rgba(246,26,90,0.1);border-radius:12px;border:1px solid rgba(246,26,90,0.2);margin-bottom:20px;">
+  <p style="color:#B4CDD3;font-size:13px;margin:0;">Get Started</p>
+  <p style="color:#F61A5A;font-size:20px;font-weight:bold;margin:8px 0 0 0;">Discover Products</p>
+</div>
+<p style="color:#8888A0;font-size:13px;">If you didn't create this account, you can ignore this email.</p>`,
+      variables: JSON.stringify(['name']),
+    },
+    {
+      key: 'purchase_confirmation',
+      subject: 'تأكيد عملية الشراء - {{productName}}',
+      subjectEn: 'Purchase Confirmation - {{productNameEn}}',
+      bodyHtml: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">تم شراء المنتج بنجاح ✅</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:12px;">مرحباً،</p>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">تم تأكيد عملية الشراء التالية:</p>
+<div style="background:rgba(26,26,46,0.8);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px;margin-bottom:20px;">
+  <p style="color:#B4CDD3;font-size:13px;margin:0 0 4px 0;">المنتج</p>
+  <p style="color:white;font-size:16px;font-weight:bold;margin:0 0 12px 0;">{{productName}}</p>
+  <p style="color:#B4CDD3;font-size:13px;margin:0 0 4px 0;">المبلغ</p>
+  <p style="color:#F61A5A;font-size:18px;font-weight:bold;margin:0;">\${{amount}}</p>
+</div>
+<p style="color:#8888A0;font-size:13px;">يمكنك الوصول إلى المنتج من قسم "مشترياتي" في حسابك.</p>`,
+      bodyHtmlEn: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">Purchase Successful ✅</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:12px;">Hello,</p>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">The following purchase has been confirmed:</p>
+<div style="background:rgba(26,26,46,0.8);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px;margin-bottom:20px;">
+  <p style="color:#B4CDD3;font-size:13px;margin:0 0 4px 0;">Product</p>
+  <p style="color:white;font-size:16px;font-weight:bold;margin:0 0 12px 0;">{{productNameEn}}</p>
+  <p style="color:#B4CDD3;font-size:13px;margin:0 0 4px 0;">Amount</p>
+  <p style="color:#F61A5A;font-size:18px;font-weight:bold;margin:0;">\${{amount}}</p>
+</div>
+<p style="color:#8888A0;font-size:13px;">You can access the product from "My Purchases" in your account.</p>`,
+      variables: JSON.stringify(['productName', 'productNameEn', 'amount']),
+    },
+    {
+      key: 'payment_confirmation',
+      subject: 'تأكيد عملية الدفع بنجاح',
+      subjectEn: 'Payment Confirmed Successfully',
+      bodyHtml: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">تمت عملية الدفع بنجاح 💳</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">تمت معالجة عملية الدفع بنجاح في حسابك.</p>
+<div style="background:rgba(26,26,46,0.8);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px;margin-bottom:20px;">
+  <p style="color:#B4CDD3;font-size:13px;margin:0 0 4px 0;">نوع العملية</p>
+  <p style="color:white;font-size:15px;font-weight:600;margin:0 0 12px 0;">{{paymentType}}</p>
+  <p style="color:#B4CDD3;font-size:13px;margin:0 0 4px 0;">المبلغ</p>
+  <p style="color:#F61A5A;font-size:18px;font-weight:bold;margin:0;">\${{amount}}</p>
+</div>
+<p style="color:#8888A0;font-size:13px;">شكراً لثقتك بنا. يمكنك مراجعة سجل المعاملات من حسابك.</p>`,
+      bodyHtmlEn: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">Payment Successful 💳</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">Your payment has been processed successfully.</p>
+<div style="background:rgba(26,26,46,0.8);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px;margin-bottom:20px;">
+  <p style="color:#B4CDD3;font-size:13px;margin:0 0 4px 0;">Transaction Type</p>
+  <p style="color:white;font-size:15px;font-weight:600;margin:0 0 12px 0;">{{paymentType}}</p>
+  <p style="color:#B4CDD3;font-size:13px;margin:0 0 4px 0;">Amount</p>
+  <p style="color:#F61A5A;font-size:18px;font-weight:bold;margin:0;">\${{amount}}</p>
+</div>
+<p style="color:#8888A0;font-size:13px;">Thank you for your trust. You can review your transaction history in your account.</p>`,
+      variables: JSON.stringify(['amount', 'paymentType']),
+    },
+    {
+      key: 'wallet_deposit',
+      subject: 'إيداع في محفظتك بنجاح',
+      subjectEn: 'Wallet Deposit Successful',
+      bodyHtml: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">إيداع في المحفظة 💰</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">تم إيداع المبلغ التالي في محفظتك بنجاح:</p>
+<div style="text-align:center;padding:24px;background:rgba(180,205,211,0.1);border-radius:12px;border:1px solid rgba(180,205,211,0.2);margin-bottom:20px;">
+  <p style="color:#B4CDD3;font-size:14px;margin:0 0 8px 0;">المبلغ المودع</p>
+  <p style="color:#B4CDD3;font-size:28px;font-weight:bold;margin:0;">\${{amount}}</p>
+</div>
+<p style="color:#8888A0;font-size:13px;">يمكنك استخدام رصيدك لشراء المنتجات من المنصة.</p>`,
+      bodyHtmlEn: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">Wallet Deposit 💰</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">The following amount has been deposited to your wallet:</p>
+<div style="text-align:center;padding:24px;background:rgba(180,205,211,0.1);border-radius:12px;border:1px solid rgba(180,205,211,0.2);margin-bottom:20px;">
+  <p style="color:#B4CDD3;font-size:14px;margin:0 0 8px 0;">Deposited Amount</p>
+  <p style="color:#B4CDD3;font-size:28px;font-weight:bold;margin:0;">\${{amount}}</p>
+</div>
+<p style="color:#8888A0;font-size:13px;">You can use your balance to purchase products from the platform.</p>`,
+      variables: JSON.stringify(['amount']),
+    },
+    {
+      key: 'wallet_withdrawal',
+      subject: 'تم تقديم طلب السحب',
+      subjectEn: 'Withdrawal Request Submitted',
+      bodyHtml: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">طلب سحب من المحفظة 📤</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">تم تقديم طلب سحب بمبلغ:</p>
+<div style="text-align:center;padding:24px;background:rgba(246,26,90,0.08);border-radius:12px;border:1px solid rgba(246,26,90,0.2);margin-bottom:20px;">
+  <p style="color:#8888A0;font-size:14px;margin:0 0 8px 0;">مبلغ السحب</p>
+  <p style="color:#F61A5A;font-size:28px;font-weight:bold;margin:0;">\${{amount}}</p>
+</div>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:12px;">سيتم مراجعة الطلب ومعالجته خلال 24-48 ساعة عمل.</p>
+<p style="color:#8888A0;font-size:13px;">سيتم إشعارك فور اعتماد السحب.</p>`,
+      bodyHtmlEn: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">Withdrawal Request 📤</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">A withdrawal request has been submitted for:</p>
+<div style="text-align:center;padding:24px;background:rgba(246,26,90,0.08);border-radius:12px;border:1px solid rgba(246,26,90,0.2);margin-bottom:20px;">
+  <p style="color:#8888A0;font-size:14px;margin:0 0 8px 0;">Withdrawal Amount</p>
+  <p style="color:#F61A5A;font-size:28px;font-weight:bold;margin:0;">\${{amount}}</p>
+</div>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:12px;">Your request will be reviewed and processed within 24-48 business hours.</p>
+<p style="color:#8888A0;font-size:13px;">You will be notified once the withdrawal is approved.</p>`,
+      variables: JSON.stringify(['amount']),
+    },
+    {
+      key: 'referral_commission',
+      subject: 'عمولة إحالة جديدة',
+      subjectEn: 'New Referral Commission',
+      bodyHtml: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">إحالة جديدة! 🎉</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">لقد انضم مستخدم جديد عبر رابط الإحالة الخاص بك.</p>
+<div style="background:rgba(59,130,246,0.1);border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid rgba(59,130,246,0.2);">
+  <p style="color:#B4CDD3;font-size:13px;margin:0 0 4px 0;">المستخدم المحال</p>
+  <p style="color:white;font-size:16px;font-weight:600;margin:0 0 12px 0;">{{referredName}}</p>
+  <p style="color:#B4CDD3;font-size:13px;margin:0 0 4px 0;">العمولة المكتسبة</p>
+  <p style="color:#3B82F6;font-size:20px;font-weight:bold;margin:0;">\${{commission}}</p>
+</div>
+<p style="color:#8888A0;font-size:13px;">استمر في مشاركة رابطك لكسب المزيد من العمولات!</p>`,
+      bodyHtmlEn: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">New Referral! 🎉</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">A new user has joined through your referral link.</p>
+<div style="background:rgba(59,130,246,0.1);border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid rgba(59,130,246,0.2);">
+  <p style="color:#B4CDD3;font-size:13px;margin:0 0 4px 0;">Referred User</p>
+  <p style="color:white;font-size:16px;font-weight:600;margin:0 0 12px 0;">{{referredName}}</p>
+  <p style="color:#B4CDD3;font-size:13px;margin:0 0 4px 0;">Commission Earned</p>
+  <p style="color:#3B82F6;font-size:20px;font-weight:bold;margin:0;">\${{commission}}</p>
+</div>
+<p style="color:#8888A0;font-size:13px;">Keep sharing your link to earn more commissions!</p>`,
+      variables: JSON.stringify(['referredName', 'commission']),
+    },
+    {
+      key: 'subscription_activated',
+      subject: 'تم تفعيل اشتراكك - {{plan}}',
+      subjectEn: 'Subscription Activated - {{plan}}',
+      bodyHtml: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">تم تفعيل الاشتراك ⭐</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">تهانينا! تم تفعيل اشتراكك بنجاح.</p>
+<div style="text-align:center;padding:24px;background:linear-gradient(135deg,rgba(176,23,67,0.1),rgba(246,26,90,0.1));border-radius:12px;border:1px solid rgba(246,26,90,0.2);margin-bottom:20px;">
+  <p style="color:#B4CDD3;font-size:14px;margin:0 0 8px 0;">الخطة المفعّلة</p>
+  <p style="color:#F61A5A;font-size:24px;font-weight:bold;margin:0;">{{plan}}</p>
+</div>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:12px;">استمتع بجميع مميزات الخطة بما فيها التحميلات غير المحدودة والدعم ذو الأولوية.</p>
+<p style="color:#8888A0;font-size:13px;">يمكنك إدارة اشتراكك من إعدادات الحساب.</p>`,
+      bodyHtmlEn: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">Subscription Activated ⭐</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">Congratulations! Your subscription has been activated.</p>
+<div style="text-align:center;padding:24px;background:linear-gradient(135deg,rgba(176,23,67,0.1),rgba(246,26,90,0.1));border-radius:12px;border:1px solid rgba(246,26,90,0.2);margin-bottom:20px;">
+  <p style="color:#B4CDD3;font-size:14px;margin:0 0 8px 0;">Activated Plan</p>
+  <p style="color:#F61A5A;font-size:24px;font-weight:bold;margin:0;">{{plan}}</p>
+</div>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:12px;">Enjoy all plan features including unlimited downloads and priority support.</p>
+<p style="color:#8888A0;font-size:13px;">You can manage your subscription from account settings.</p>`,
+      variables: JSON.stringify(['plan']),
+    },
+    {
+      key: 'subscription_cancelled',
+      subject: 'تم إلغاء اشتراكك - {{plan}}',
+      subjectEn: 'Subscription Cancelled - {{plan}}',
+      bodyHtml: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">إلغاء الاشتراك</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">تم إلغاء اشتراكك في الخطة <strong style="color:#F61A5A;">{{plan}}</strong>.</p>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:12px;">ستبقى مميزات الخطة فعالة حتى نهاية فترة الاشتراك الحالية.</p>
+<p style="color:#8888A0;font-size:13px;">يمكنك إعادة الاشتراك في أي وقت من صفحة الاشتراكات.</p>`,
+      bodyHtmlEn: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">Subscription Cancelled</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">Your <strong style="color:#F61A5A;">{{plan}}</strong> subscription has been cancelled.</p>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:12px;">Your plan features will remain active until the end of the current billing period.</p>
+<p style="color:#8888A0;font-size:13px;">You can re-subscribe at any time from the subscriptions page.</p>`,
+      variables: JSON.stringify(['plan']),
+    },
+    {
+      key: 'password_reset',
+      subject: 'استعادة كلمة المرور',
+      subjectEn: 'Password Recovery',
+      bodyHtml: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">استعادة كلمة المرور 🔐</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">مرحباً {{name}}،</p>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">تم طلب إعادة تعيين كلمة المرور لحسابك. إذا لم تكن أنت من طلب هذا، يمكنك تجاهل هذه الرسالة بأمان.</p>
+<div style="text-align:center;padding:20px;background:rgba(246,26,90,0.08);border-radius:12px;border:1px solid rgba(246,26,90,0.15);margin-bottom:20px;">
+  <p style="color:#8888A0;font-size:13px;margin:0;">الحساب</p>
+  <p style="color:white;font-size:15px;margin:4px 0 0 0;">{{email}}</p>
+</div>
+<p style="color:#8888A0;font-size:13px;">لأسباب أمنية، يرجى التواصل مع فريق الدعم لاستعادة حسابك.</p>`,
+      bodyHtmlEn: `<h2 style="color:#F61A5A;font-size:20px;margin-bottom:16px;">Password Recovery 🔐</h2>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">Hello {{name}},</p>
+<p style="color:#E8E8F0;font-size:15px;line-height:1.8;margin-bottom:20px;">A password reset was requested for your account. If you didn't request this, you can safely ignore this email.</p>
+<div style="text-align:center;padding:20px;background:rgba(246,26,90,0.08);border-radius:12px;border:1px solid rgba(246,26,90,0.15);margin-bottom:20px;">
+  <p style="color:#8888A0;font-size:13px;margin:0;">Account</p>
+  <p style="color:white;font-size:15px;margin:4px 0 0 0;">{{email}}</p>
+</div>
+<p style="color:#8888A0;font-size:13px;">For security reasons, please contact support to recover your account.</p>`,
+      variables: JSON.stringify(['name', 'email']),
+    },
+  ];
+
+  for (const tpl of emailTemplates) {
+    await db.emailTemplate.upsert({
+      where: { key: tpl.key },
+      update: {},
+      create: tpl,
+    });
+  }
+  console.log('Email templates created (' + emailTemplates.length + ')');
+
   console.log('Seeding completed!');
 }
 

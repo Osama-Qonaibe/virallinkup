@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { notifyPayment, notifyWalletDeposit, notifySubscription } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,6 +42,8 @@ export async function POST(request: NextRequest) {
           description: `Wallet deposit - $${payment.amount.toFixed(2)} (Demo)`,
         },
       });
+      // Send wallet deposit notification
+      notifyWalletDeposit(payment.userId, payment.amount).catch(() => {});
     } else if (payment.type === 'SUBSCRIPTION') {
       const metadata = payment.metadata ? JSON.parse(payment.metadata) : {};
       const plan = metadata.plan || 'BASIC';
@@ -55,9 +58,12 @@ export async function POST(request: NextRequest) {
           subscriptionExpiresAt: expiresAt,
         },
       });
+      // Send subscription notification
+      notifySubscription(payment.userId, plan).catch(() => {});
     } else if (payment.type === 'PURCHASE') {
       const metadata = payment.metadata ? JSON.parse(payment.metadata) : {};
       if (metadata.productId) {
+        const product = await db.product.findUnique({ where: { id: metadata.productId } });
         await db.order.create({
           data: {
             userId: payment.userId,
@@ -71,8 +77,16 @@ export async function POST(request: NextRequest) {
           where: { id: metadata.productId },
           data: { downloads: { increment: 1 } },
         });
+        // Send purchase notification
+        if (product) {
+          const { notifyPurchase } = await import('@/lib/notifications');
+          notifyPurchase(payment.userId, product.title, product.titleEn || product.title, payment.amount).catch(() => {});
+        }
       }
     }
+
+    // Send general payment notification
+    notifyPayment(payment.userId, payment.amount, payment.type).catch(() => {});
 
     // Fetch updated user for response
     const updatedUser = await db.user.findUnique({ where: { id: payment.userId } });

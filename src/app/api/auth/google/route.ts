@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { signToken, setTokenCookie } from '@/lib/jwt';
+import { notifyWelcome } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,6 +43,9 @@ export async function POST(request: NextRequest) {
         },
       });
     }
+
+    // Send welcome notification (non-blocking)
+    notifyWelcome(user.id, user.name || email).catch(() => {});
 
     const token = signToken({ userId: user.id, email: user.email, role: user.role });
 

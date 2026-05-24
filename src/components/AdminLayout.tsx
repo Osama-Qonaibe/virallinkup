@@ -5,7 +5,7 @@ import { t } from '@/lib/translations';
 import { useState } from 'react';
 import {
   LayoutDashboard, Package, Users, ShoppingCart, Settings,
-  FileText, MessageSquare, FolderOpen, Menu, X
+  FileText, MessageSquare, FolderOpen, Menu, X, Mail
 } from 'lucide-react';
 
 const sidebarItems = [
@@ -16,6 +16,7 @@ const sidebarItems = [
   { key: 'admin-categories', icon: FolderOpen, labelKey: 'categoriesManage' },
   { key: 'admin-testimonials', icon: MessageSquare, labelKey: 'testimonialsManage' },
   { key: 'admin-pages', icon: FileText, labelKey: 'pages' },
+  { key: 'admin-email', icon: Mail, labelKey: 'emailTemplates' },
   { key: 'admin-settings', icon: Settings, labelKey: 'settings' },
 ];
 

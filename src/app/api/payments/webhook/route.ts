@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import Stripe from 'stripe';
+import { notifyPayment, notifyWalletDeposit, notifySubscription, notifyPurchase, notifySubscriptionCancel } from '@/lib/notifications';
 
 async function getStripeKeys() {
   const keys = await db.siteSetting.findMany({
@@ -21,12 +22,10 @@ async function completePayment(paymentIntentId: string, stripePaymentId: string)
   });
 
   if (payment.type === 'DEPOSIT') {
-    // Credit wallet balance
     await db.user.update({
       where: { id: payment.userId },
       data: { walletBalance: { increment: payment.amount } },
     });
-    // Create wallet transaction
     await db.walletTransaction.create({
       data: {
         userId: payment.userId,
@@ -35,6 +34,7 @@ async function completePayment(paymentIntentId: string, stripePaymentId: string)
         description: `Wallet deposit - $${payment.amount.toFixed(2)}`,
       },
     });
+    notifyWalletDeposit(payment.userId, payment.amount).catch(() => {});
   } else if (payment.type === 'SUBSCRIPTION') {
     const metadata = payment.metadata ? JSON.parse(payment.metadata) : {};
     const plan = metadata.plan || 'BASIC';
@@ -49,9 +49,11 @@ async function completePayment(paymentIntentId: string, stripePaymentId: string)
         subscriptionExpiresAt: expiresAt,
       },
     });
+    notifySubscription(payment.userId, plan).catch(() => {});
   } else if (payment.type === 'PURCHASE') {
     const metadata = payment.metadata ? JSON.parse(payment.metadata) : {};
     if (metadata.productId) {
+      const product = await db.product.findUnique({ where: { id: metadata.productId } });
       await db.order.create({
         data: {
           userId: payment.userId,
@@ -65,8 +67,13 @@ async function completePayment(paymentIntentId: string, stripePaymentId: string)
         where: { id: metadata.productId },
         data: { downloads: { increment: 1 } },
       });
+      if (product) {
+        notifyPurchase(payment.userId, product.title, product.titleEn || product.title, payment.amount).catch(() => {});
+      }
     }
   }
+
+  notifyPayment(payment.userId, payment.amount, payment.type).catch(() => {});
 }
 
 async function failPayment(paymentIntentId: string, reason: string) {
@@ -83,7 +90,6 @@ export async function POST(request: NextRequest) {
     const isDemoMode = !keys.stripe_secret_key || !keys.stripe_webhook_secret;
 
     if (isDemoMode) {
-      // Demo mode webhook handler
       const body = await request.json();
       const { event } = body;
 
@@ -101,7 +107,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    // Live mode: verify Stripe webhook signature
+    // Live mode
     const stripe = new Stripe(keys.stripe_secret_key, { apiVersion: '2025-04-30.basil' });
     const sig = request.headers.get('stripe-signature');
 
@@ -122,7 +128,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: message }, { status: 400 });
     }
 
-    // Handle events
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       const paymentIntentId = session.metadata?.paymentIntentId;
@@ -135,7 +140,6 @@ export async function POST(request: NextRequest) {
       if (paymentIntentId) {
         await completePayment(paymentIntentId, invoice.id);
       }
-      // Also update subscription status
       if (invoice.customer) {
         const user = await db.user.findFirst({ where: { stripeCustomerId: invoice.customer as string } });
         if (user) {
@@ -155,11 +159,24 @@ export async function POST(request: NextRequest) {
       }
       if (invoice.customer) {
         const user = await db.user.findFirst({ where: { stripeCustomerId: invoice.customer as string } });
-        if (user) {
+        if (user && user.subscriptionPlan) {
           await db.user.update({
             where: { id: user.id },
             data: { subscriptionStatus: 'PAST_DUE' },
           });
+          notifySubscriptionCancel(user.id, user.subscriptionPlan).catch(() => {});
+        }
+      }
+    } else if (event.type === 'customer.subscription.deleted') {
+      const sub = event.data.object as Stripe.Subscription;
+      if (sub.customer) {
+        const user = await db.user.findFirst({ where: { stripeCustomerId: sub.customer as string } });
+        if (user && user.subscriptionPlan) {
+          await db.user.update({
+            where: { id: user.id },
+            data: { subscriptionStatus: 'CANCELLED' },
+          });
+          notifySubscriptionCancel(user.id, user.subscriptionPlan).catch(() => {});
         }
       }
     }

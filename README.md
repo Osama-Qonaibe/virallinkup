@@ -1,626 +1,368 @@
-# ViralLinkUp — منصة بيع المنتجات الرقمية
+# ViralLinkUp - Digital Products Marketplace
 
-> منصة متكاملة لبيع حزم المنتجات الرقمية مع نظام إحالات ومحفظة رقمية ولوحة تحكم إدارية شاملة، تدعم العربية والإنجليزية بتصميم احترافي تقني.
+> منصة احترافية لبيع المنتجات الرقمية مع دعم كامل للغتين العربية والإنجليزية
 
----
+A professional digital products marketplace with full Arabic/English bilingual support, real-time notifications, email system, referral program, and comprehensive admin dashboard.
 
-## 📑 جدول المحتويات
+## 🚀 Tech Stack
 
-- [نظرة عامة](#-نظرة-عامة)
-- [المميزات الرئيسية](#-المميزات-الرئيسية)
-- [البنية التقنية](#-البنية-التقنية)
-- [هيكل المشروع](#-هيكل-المشروع)
-- [طبقات النظام](#-طبقات-النظام)
-  - [طبقة العرض (Frontend)](#1-طبقة-العرض-frontend)
-  - [طبقة واجهة برمجة التطبيقات (API)](#2-طبقة-api)
-  - [طبقة البيانات (Database)](#3-طبقة-البيانات-database)
-  - [طبقة المصادقة والأمان (Auth)](#4-طبقة-المصادقة-والأمان-auth)
-  - [طبقة الدفع (Payments)](#5-طبقة-الدفع-payments)
-- [الأقسام العامة](#-الأقسام-العامة)
-- [نظام لوحة التحكم للمستخدم](#-نظام-لوحة-التحكم-للمستخدم)
-- [نظام لوحة التحكم للمدير](#-نظام-لوحة-التحكم-للمدير)
-- [نظام الإحالات](#-نظام-الإحالات)
-- [نظام التراخيص الرقمية](#-نظام-التراخيص-الرقمية)
-- [نظام المصادقة وحفظ الجلسة](#-نظام-المصادقة-وحفظ-الجلسة)
-- [إعداد المشروع](#-إعداد-المشروع)
-- [الحسابات الافتراضية](#-الحسابات-الافتراضية)
-- [متغيرات البيئة](#-متغيرات-البيئة)
-- [التحقق من صحة المشروع](#-التحقق-من-صحة-المشروع)
+| Technology | Purpose |
+|---|---|
+| **Next.js 16** | React framework with App Router |
+| **TypeScript** | Type safety |
+| **Tailwind CSS 4** | Utility-first styling |
+| **Prisma ORM** | Database management |
+| **SQLite** | Lightweight database |
+| **Zustand** | Client-side state management |
+| **JWT** | Authentication with httpOnly cookies |
+| **bcryptjs** | Password hashing |
+| **Stripe** | Payment processing |
+| **Nodemailer** | Email service (SMTP) |
+| **Framer Motion** | Animations |
 
----
-
-## 🎯 نظرة عامة
-
-**ViralLinkUp** هي منصة إلكترونية متكاملة مصممة لبيع وشراء المنتجات الرقمية بشكل احترافي. تدعم المنصة اللغتين العربية والإنجليزية مع اتجاهين للعرض (RTL/LTR)، وتتميز بنظام محفظة رقمية ونظام إحالات متطور يتيح للمستخدمين كسب عمولات من تسجيل أصدقائهم.
-
----
-
-## ✨ المميزات الرئيسية
-
-| الميزة | الوصف |
-|--------|-------|
-| 🌐 ثنائي اللغة | دعم كامل للعربية (RTL) والإنجليزية (LTR) مع حفظ التفضيل |
-| 🔐 مصادقة آمنة | تسجيل دخول بالبريد/كلمة المرور + Google + JWT مع httpOnly Cookies |
-| 💰 محفظة رقمية | رصيد قابل للشحن والسحب مع سجل معاملات كامل |
-| 🤝 نظام إحالات | كود إحالة فريد + عمولات تلقائية + تتبع كامل |
-| 📦 6 أنواع ترخيص | شخصي، تجاري، ممتد، إعادة بيع، مؤسسي، حقوق تأليف خاصة |
-| 🔑 لوحة تحكم شاملة | للمستخدم والمدير مع إحصائيات وإدارة كاملة |
-| 💳 Stripe متكامل | جلسات دفع + Webhooks + تفعيل اشتراكات تلقائي |
-| 🎨 تصميم احترافي | Glassmorphism + تدرجات لونية + أنيميشن تقني |
-| 📱 متجاوب بالكامل | يعمل على جميع الأجهزة بحجم متجاوب |
-| 💾 حفظ الجلسة | بقاء تسجيل الدخول والتفضيلات بعد تحديث الصفحة |
-
----
-
-## 🏗️ البنية التقنية
-
-```
-┌─────────────────────────────────────────────────────┐
-│                    المتصفح (Client)                   │
-│  React 19 + Next.js 16 + TypeScript + Tailwind CSS 4 │
-│  Zustand (حالة التطبيق) + Framer Motion (الحركات)    │
-├─────────────────────────────────────────────────────┤
-│                  واجهة API (Server)                   │
-│  Next.js API Routes + Prisma ORM + JWT Authentication│
-│  Stripe SDK + bcryptjs + jsonwebtoken               │
-├─────────────────────────────────────────────────────┤
-│                   قاعدة البيانات                      │
-│              SQLite (عبر Prisma)                      │
-└─────────────────────────────────────────────────────┘
-```
-
-### التقنيات المستخدمة
-
-| التقنية | الإصدار | الغرض |
-|---------|---------|-------|
-| Next.js | 16.1.3 | إطار العمل مع Turbopack |
-| React | 19 | مكتبة واجهة المستخدم |
-| TypeScript | 5 | لغة برمجة مكتوبة |
-| Tailwind CSS | 4 | تصميم وتنسيق |
-| Prisma | 6 | إدارة قاعدة البيانات (ORM) |
-| SQLite | — | قاعدة بيانات خفيفة |
-| Zustand | 5 | إدارة حالة التطبيق (مع persist) |
-| Framer Motion | 12 | أنيميشن وتفاعلات |
-| JWT | 9 | مصادقة_tokens آمنة |
-| Stripe | 22 | بوابة الدفع |
-| bcryptjs | 3 | تشفير كلمات المرور |
-| Lucide React | — | أيقونات |
-
----
-
-## 📁 هيكل المشروع
+## 📁 Project Structure
 
 ```
 virallinkup/
 ├── prisma/
-│   ├── schema.prisma          # مخطط قاعدة البيانات (13 نموذج)
-│   └── migrations/            # ملفات الترحيل
+│   └── schema.prisma          # 13 database models
 ├── public/
-│   ├── logo.jpg               # شعار المنصة
-│   └── slider1-6.png          # صور البانر الرئيسي
+│   ├── logo.jpg / logo.svg    # Brand assets
+│   └── slider1-6.png          # Hero slider images
 ├── src/
-│   ├── app/
-│   │   ├── layout.tsx         # التخطيط الجذري (مخطط اللغة)
-│   │   ├── page.tsx           # الصفحة الرئيسية (SPA Router)
-│   │   ├── globals.css        # الأنماط العامة (325 سطر)
-│   │   └── api/               # مسارات API (28 نقطة نهاية)
-│   │       ├── auth/          # المصادقة (6 نقاط)
-│   │       ├── admin/         # إدارة المدير (6 نقاط)
-│   │       ├── payments/      # المدفوعات (6 نقاط)
-│   │       ├── user/          # بيانات المستخدم
-│   │       ├── products/      # المنتجات
-│   │       ├── orders/        # الطلبات
-│   │       ├── categories/    # التصنيفات
-│   │       ├── referrals/     # الإحالات
-│   │       ├── settings/      # إعدادات الموقع
-│   │       ├── testimonials/  # الشهادات
-│   │       ├── pages/         # الصفحات القانونية
-│   │       └── wallet/        # المحفظة
+│   ├── lib/
+│   │   ├── db.ts              # Prisma client singleton
+│   │   ├── jwt.ts             # JWT sign/verify/cookie helpers
+│   │   ├── store.ts           # Zustand store with persist
+│   │   ├── translations.ts    # AR/EN translations (~710 keys)
+│   │   ├── constants.ts       # TypeScript interfaces & constants
+│   │   ├── utils.ts           # cn() helper
+│   │   ├── email.ts           # Email service with professional templates
+│   │   └── notifications.ts   # Notification system with email integration
 │   ├── components/
-│   │   ├── ui/                # مكونات واجهة المستخدم الأساسية (5)
-│   │   ├── SiteHeader.tsx     # الرأس مع القائمة والتنقل
-│   │   ├── SiteFooter.tsx     # التذييل
-│   │   ├── HeroSlider.tsx     # بانر رئيسي (6 شرائح)
-│   │   ├── TechBackground.tsx # خلفية تقنية متحركة
-│   │   ├── AuthInitializer.tsx # استعادة الجلسة
-│   │   ├── LoginCard.tsx      # نموذج تسجيل الدخول
-│   │   ├── RegisterCard.tsx   # نموذج التسجيل
-│   │   ├── ForgotPasswordCard.tsx # استعادة كلمة المرور
-│   │   ├── PackagesPreview.tsx # معاينة المنتجات
-│   │   ├── PackagesList.tsx   # قائمة المنتجات الكاملة
-│   │   ├── PackageDetail.tsx  # تفاصيل المنتج
-│   │   ├── CategoriesPage.tsx # صفحة التصنيفات
-│   │   ├── SubscriptionsPage.tsx # الاشتراكات
-│   │   ├── FAQSection.tsx     # قسم الأسئلة الشائعة
-│   │   ├── FAQPage.tsx        # صفحة الأسئلة الكاملة
-│   │   ├── FeaturesSection.tsx # قسم المميزات
-│   │   ├── TestimonialsSection.tsx # قسم الشهادات
-│   │   ├── StatsSection.tsx   # قسم الإحصائيات
-│   │   ├── CTASection.tsx     # قسم الدعوة للعمل
-│   │   ├── LegalPageView.tsx  # عرض الصفحات القانونية
-│   │   ├── ScrollToTop.tsx    # زر العودة للأعلى
-│   │   ├── AdminLayout.tsx    # تخطيط لوحة المدير
-│   │   ├── AdminDashboard.tsx # لوحة المدير الرئيسية
-│   │   ├── AdminProducts.tsx  # إدارة المنتجات
-│   │   ├── AdminUsers.tsx     # إدارة المستخدمين
-│   │   ├── AdminOrders.tsx    # إدارة الطلبات
-│   │   ├── AdminCategories.tsx # إدارة التصنيفات
-│   │   ├── AdminPages.tsx     # إدارة الصفحات
-│   │   ├── AdminTestimonials.tsx # إدارة الشهادات
-│   │   ├── AdminSettings.tsx  # إعدادات الموقع
-│   │   ├── UserDashboard.tsx  # لوحة المستخدم
-│   │   ├── UserPurchases.tsx  # مشتريات المستخدم
-│   │   ├── UserDownloads.tsx  # تنزيلات المستخدم
-│   │   ├── UserReferrals.tsx  # نظام الإحالات
-│   │   └── UserWallet.tsx     # المحفظة الرقمية
-│   ├── hooks/
-│   │   └── use-toast.ts       # خطاف الإشعارات
-│   └── lib/
-│       ├── store.ts           # حالة التطبيق (Zustand + persist)
-│       ├── constants.ts       # ثوابت مشتركة وأنواع TypeScript
-│       ├── db.ts             # اتصال Prisma بقاعدة البيانات
-│       ├── jwt.ts             # أدوات JWT وتعيين الكوكيز
-│       ├── translations.ts    # ملف الترجمة (330+ مفتاح)
-│       └── utils.ts          # أدوات مساعدة
-├── .env                       # متغيرات البيئة
-├── next.config.ts             # إعدادات Next.js
-├── tailwind.config.ts         # إعدادات Tailwind
-└── package.json               # الحزم والسكريبتات
+│   │   ├── SiteHeader.tsx     # Sticky header with nav + notification bell
+│   │   ├── SiteFooter.tsx     # Footer with newsletter + legal links
+│   │   ├── HeroSlider.tsx     # Hero carousel (6 slides)
+│   │   ├── FeaturesSection.tsx
+│   │   ├── PackagesPreview.tsx
+│   │   ├── PackagesList.tsx
+│   │   ├── PackageDetail.tsx
+│   │   ├── CategoriesPage.tsx
+│   │   ├── SubscriptionsPage.tsx
+│   │   ├── FAQSection.tsx / FAQPage.tsx
+│   │   ├── CTASection.tsx
+│   │   ├── StatsSection.tsx
+│   │   ├── TestimonialsSection.tsx
+│   │   ├── TechBackground.tsx
+│   │   ├── ScrollToTop.tsx
+│   │   ├── LegalPageView.tsx
+│   │   ├── AuthInitializer.tsx
+│   │   ├── LoginCard.tsx / RegisterCard.tsx / ForgotPasswordCard.tsx
+│   │   ├── NotificationBell.tsx       # Real-time notification bell
+│   │   ├── AdminLayout.tsx           # Admin sidebar navigation
+│   │   ├── AdminDashboard.tsx
+│   │   ├── AdminProducts.tsx
+│   │   ├── AdminOrders.tsx
+│   │   ├── AdminUsers.tsx
+│   │   ├── AdminCategories.tsx
+│   │   ├── AdminTestimonials.tsx
+│   │   ├── AdminPages.tsx
+│   │   ├── AdminSettings.tsx
+│   │   ├── AdminEmailTemplates.tsx    # Email template management
+│   │   ├── UserDashboard.tsx
+│   │   ├── UserPurchases.tsx
+│   │   ├── UserDownloads.tsx
+│   │   ├── UserReferrals.tsx
+│   │   ├── UserWallet.tsx
+│   │   └── ui/               # shadcn/ui components
+│   ├── app/
+│   │   ├── layout.tsx        # Root layout (RTL/LTR, fonts, Toaster)
+│   │   ├── page.tsx          # SPA router (24+ pages)
+│   │   ├── globals.css       # Tailwind + custom styles
+│   │   └── api/
+│   │       ├── auth/         # login, register, logout, me, google, forgot-password
+│   │       ├── admin/        # products, users, orders, stats, categories, pages, settings, email-templates, email-settings, email-test
+│   │       ├── notifications/ # list, unread, mark-read, mark-all-read
+│   │       ├── orders/       # create + list
+│   │       ├── payments/     # create-checkout, verify, webhook, history, cancel-subscription, test-connection
+│   │       ├── products/     # list + detail
+│   │       ├── categories/   # list + create
+│   │       ├── referrals/    # list user referrals
+│   │       ├── settings/     # get + update
+│   │       ├── testimonials/ # list + create
+│   │       ├── user/         # dashboard stats
+│   │       └── wallet/       # withdraw
+│   └── hooks/
+│       └── use-toast.ts
+├── .env                       # Environment variables (gitignored)
+├── .env.example               # Environment template
+├── .gitignore
+├── package.json
+├── tailwind.config.ts
+├── tsconfig.json
+└── seed.ts                    # Database seeder with 9 email templates
 ```
 
----
-
-## 🧩 طبقات النظام
-
-### 1. طبقة العرض (Frontend)
-
-تطبيق صفحة واحدة (SPA) يعمل داخل Next.js. التنقل بين الصفحات يتم عبر متغير `currentPage` في مخزن Zustand بدون إعادة تحميل الصفحة.
-
-#### مكونات الصفحة الرئيسية (Landing Page)
-
-| المكون | الوصف |
-|--------|-------|
-| `HeroSlider` | بانر رئيسي مع 6 صور متحركة، تمرير تلقائي كل 5 ثواني، أزرار تنقل |
-| `FeaturesSection` | عرض 6 مميزات رئيسية للمنصة بأيقونات متحركة |
-| `PackagesPreview` | معاينة أحدث 6 منتجات مع صور وأسعار ونوع الترخيص |
-| `TestimonialsSection` | عرض آراء العملاء مع تقييم نجوم |
-| `StatsSection` | إحصائيات المنصة (عدد المنتجات، المستخدمين، التحميلات) |
-| `FAQSection` | قسم الأسئلة الشائعة القابل للطي (6 أسئلة) |
-| `CTASection` | قسم الدعوة للعمل للتسجيل |
-
-#### تصميم واجهة المستخدم
-
-- **Glassmorphism**: بطاقات بتأثير الزجاج المعتم (backdrop-blur + شفافية)
-- **التدرج اللوني الرئيسي**: `#B01743` → `#F61A5A` → `#FF6B8A`
-- **اللون الثانوي**: `#B4CDD3` (سماوي)
-- **الخلفية**: `#0F0F1A` (داكنة عميقة)
-- **الخط**: Cairo (للعربية) + Inter (للإنجليزية)
-- **الحركات**: Framer Motion + CSS Animations (float, pulse-glow, slide-up)
-
----
-
-### 2. طبقة API
-
-28 نقطة نهاية (endpoint) مقسمة إلى:
-
-#### واجهات المصادقة (`/api/auth/`)
-
-| المسار | الطريقة | الوصف |
-|--------|---------|-------|
-| `/api/auth/login` | POST | تسجيل دخول بالبريد + كلمة المرور، يُعيّن JWT cookie |
-| `/api/auth/register` | POST | إنشاء حساب جديد، يُعيّن JWT cookie |
-| `/api/auth/google` | POST | دخول/تسجيل عبر Google، يُعيّن JWT cookie |
-| `/api/auth/logout` | POST | تسجيل الخروج، يمسح JWT cookie |
-| `/api/auth/me` | GET | التحقق من الجلسة واستعادة بيانات المستخدم |
-| `/api/auth/forgot-password` | POST | طلب إعادة تعيين كلمة المرور |
-
-#### واجهات المدير (`/api/admin/`)
-
-| المسار | الطريقة | الوصف |
-|--------|---------|-------|
-| `/api/admin/stats` | GET | إحصائيات شاملة (مبيعات، مستخدمين، منتجات) |
-| `/api/admin/products` | GET | قائمة المنتجات مع البحث والتصفية |
-| `/api/admin/products/[id]` | GET/PUT/DELETE | عرض/تعديل/حذف منتج |
-| `/api/admin/users` | GET | قائمة المستخدمين |
-| `/api/admin/users/[id]` | PUT/DELETE | تعديل/حذف مستخدم |
-| `/api/admin/orders` | GET | قائمة جميع الطلبات |
-
-#### واجهات المنتجات والطلبات
-
-| المسار | الطريقة | الوصف |
-|--------|---------|-------|
-| `/api/products` | GET | المنتجات النشطة مع بحث وتصفية وترتيب |
-| `/api/products/[id]` | GET | تفاصيل منتج واحد |
-| `/api/orders` | POST | إنشاء طلب شراء جديد |
-| `/api/categories` | GET | جميع التصنيفات |
-| `/api/pages/[slug]` | GET | محتوى صفحة قانونية |
-
-#### واجهات المدفوعات (`/api/payments/`)
-
-| المسار | الطريقة | الوصف |
-|--------|---------|-------|
-| `/api/payments/create-checkout` | POST | إنشاء جلسة دفع Stripe |
-| `/api/payments/webhook` | POST | استقبال أحداث Stripe (تفعيل الاشتراكات) |
-| `/api/payments/verify` | GET | التحقق من حالة الدفع |
-| `/api/payments/history` | GET | سجل المدفوعات |
-| `/api/payments/cancel-subscription` | POST | إلغاء اشتراك |
-| `/api/payments/test-connection` | POST | اختبار اتصال Stripe |
-
-#### واجهات أخرى
-
-| المسار | الطريقة | الوصف |
-|--------|---------|-------|
-| `/api/user/dashboard` | GET | بيانات لوحة تحكم المستخدم |
-| `/api/referrals` | GET | بيانات الإحالات |
-| `/api/wallet/withdraw` | POST | سحب رصيد من المحفظة |
-| `/api/settings` | GET/PUT | إعدادات الموقع |
-| `/api/testimonials` | GET | الشهادات |
-
----
-
-### 3. طبقة البيانات (Database)
-
-قاعدة بيانات SQLite تُدار عبر Prisma ORM مع 13 نموذج (model):
-
-```
-┌─────────────┐     ┌─────────────┐     ┌──────────────┐
-│    User      │────<│    Order     │>────│   Product    │
-├─────────────┤     ├─────────────┤     ├──────────────┤
-│ id          │     │ id          │     │ id           │
-│ email       │     │ userId      │     │ title/titleEn│
-│ name        │     │ productId   │     │ price        │
-│ password    │     │ licenseType │     │ licenseType  │
-│ role        │     │ amount      │     │ category     │
-│ walletBalance│    │ status      │     │ features     │
-│ referralCode│     │ createdAt   │     │ thumbnailUrl │
-│ stripe*     │     └─────────────┘     │ downloads    │
-└──────┬──────┘                          └──────────────┘
-       │
-       ├────<── Referral ──>── User (المُحال)
-       │
-       ├────<── WalletTransaction
-       │
-       ├────<── PaymentIntent
-       │
-       └────<── Order
-
-┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-│ SiteSetting  │  │    Page      │  │  Testimonial  │
-├──────────────┤  ├──────────────┤  ├──────────────┤
-│ key          │  │ slug         │  │ name/nameEn  │
-│ value        │  │ title        │  │ content      │
-└──────────────┘  │ content      │  │ rating       │
-                  └──────────────┘  └──────────────┘
-
-┌──────────────┐  ┌──────────────┐
-│   Category   │  │ContactMessage│
-├──────────────┤  ├──────────────┤
-│ slug         │  │ name/email   │
-│ name/nameEn  │  │ message      │
-│ icon         │  │ isRead       │
-└──────────────┘  └──────────────┘
-```
-
----
-
-### 4. طبقة المصادقة والأمان (Auth)
-
-```
-تسجيل الدخول
-     │
-     ▼
-POST /api/auth/login
-     │
-     ├── التحقق من البريد وكلمة المرور (bcrypt)
-     │
-     ├── إنشاء JWT Token (30 يوم)
-     │   └── payload: { userId, email, role }
-     │
-     ├── تعيين httpOnly Cookie
-     │   └── Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=30d
-     │
-     └── إرجاع بيانات المستخدم للعميل
-
-استعادة الجلسة (عند تحديث الصفحة)
-     │
-     ▼
-AuthInitializer ──> GET /api/auth/me
-     │
-     ├── قراءة JWT من Cookie
-     ├── التحقق من التوقيع
-     ├── جلب بيانات المستخدم من DB
-     └── تعيين حالة المستخدم في Zustand
-
-حفظ التفضيلات
-     │
-     ├── اللغة: Zustand persist → localStorage
-     ├── دور المستخدم: Zustand persist → localStorage
-     └── تفعيل اللغة: <script> مبكر في layout.tsx
-          └── يقرأ من localStorage قبل React hydration
-```
-
----
-
-### 5. طبقة الدفع (Payments)
-
-```
-إيداع في المحفظة / شراء اشتراك
-     │
-     ▼
-POST /api/payments/create-checkout
-     │
-     ├── إنشاء Stripe Checkout Session
-     │   ├── mode: 'payment' (إيداع) أو 'subscription' (اشتراك)
-     │   ├── success_url + cancel_url
-     │   └── metadata: { userId, type, amount }
-     │
-     └── إرجاع جلسة الدفع (checkoutUrl)
-
-     │ (المستخدم يكمل الدفع في Stripe)
-     ▼
-
-POST /api/payments/webhook
-     │
-     ├── التحقق من توقيع Webhook
-     │
-     ├── event: checkout.session.completed
-     │   ├── إيداع: إضافة الرصيد للمحفظة + WalletTransaction
-     │   └── اشتراك: تفعيل SubscriptionPlan للمستخدم
-     │
-     └── event: customer.subscription.deleted
-         └── إلغاء الاشتراك + تحديث الحالة
-```
-
----
-
-## 🏠 الأقسام العامة
-
-### الصفحة الرئيسية
-- **بانر متحرك** مع 6 صور تلقائية التمرير وأزرار CTA
-- **قسم المميزات** (6 مميزات: منتجات متنوعة، تراخيص مرنة، دعم فني، أسعار منافسة، تحديثات مستمرة، مجتمع نشط)
-- **معاينة المنتجات** (6 منتجات مميزة مع صور وسعر ونوع ترخيص)
-- **شهادات العملاء** (آراء وتقييمات)
-- **إحصائيات** (أرقام متحركة للمنتجات والمستخدمين)
-- **الأسئلة الشائعة** (قابل للطي، 6 أسئلة)
-- **قسم CTA** للتحفيز على التسجيل
-
-### صفحات أخرى
-- **المنتجات**: قائمة كاملة مع بحث وفلاتر (تصنيف، ترخيص، ترتيب)
-- **تفاصيل المنتج**: صور، وصف، ميزات، سعر، نوع ترخيص، زر شراء
-- **التصنيفات**: عرض التصنيفات مع المنتجات التابعة
-- **الاشتراكات**: خطط الاشتراك والدفع عبر Stripe
-- **الأسئلة الشائعة**: صفحة كاملة بجميع الأسئلة
-- **الصفحات القانونية**: سياسة الخصوصية، شروط الاستخدام، إلخ
-
----
-
-## 👤 نظام لوحة التحكم للمستخدم
-
- accessible من `user-dashboard` بعد تسجيل الدخول:
-
-| القسم | الوصف |
-|-------|-------|
-| **الرئيسية** | إحصائيات سريعة (مشتريات، إنفاق، إحالات، رصيد) + أحدث الطلبات + أزرار وصول سريع |
-| **مشترياتي** (`user-purchases`) | جدول كامل بجميع الطلبات مع الحالة والمنتج والمبلغ |
-| **تنزيلاتي** (`user-downloads`) | قائمة المنتجات المشتراة مع زر تنزيل الملف |
-| **محفظتي** (`user-wallet`) | الرصيد الحالي + سجل المعاملات + زر إيداع + سحب |
-| **إحالاتي** (`user-referrals`) | كود الإحالة الفريد + رابط الإحالة + قائمة المُحالين + العمولات المكتسبة |
-
----
-
-## 🛡️ نظام لوحة التحكم للمدير
-
-accessible من `admin-dashboard` (تلقائي لحسابات ADMIN):
-
-### الشريط الجانبي
-8 أقسام: نظرة عامة، المنتجات، الطلبات، المستخدمين، التصنيفات، الشهادات، الصفحات، الإعدادات
-
-### نظرة عامة (`admin-dashboard`)
-- بطاقات إحصائية: إجمالي المبيعات، المستخدمين، المنتجات، الطلبات الأخيرة
-- إحصائيات بيانية للإيرادات الشهرية
-- أحدث 5 طلبات
-
-### إدارة المنتجات (`admin-products`)
-- قائمة جميع المنتجات مع البحث
-- إضافة/تعديل/حذف منتجات
-- رفع صور مصغرة + ملف المنتج
-- تحديد نوع الترخيص والسعر والتصنيف
-- تفعيل/تعطيل المنتج
-
-### إدارة المستخدمين (`admin-users`)
-- قائمة جميع المستخدمين مع البحث
-- عرض الرصيد وعدد الطلبات
-- حذف المستخدم
-
-### إدارة الطلبات (`admin-orders`)
-- قائمة جميع الطلبات مع التصفية حسب الحالة
-- تعديل حالة الطلب (مكتمل، معلّق، مسترد)
-
-### إدارة التصنيفات (`admin-categories`)
-- إضافة/تعديل/حذف تصنيفات
-- تحديد الأيقونة والترتيب
-
-### إدارة الشهادات (`admin-testimonials`)
-- إضافة/تعديل/حذف شهادات
-- تحديد الاسم والمحتوى والتقييم
-
-### إدارة الصفحات (`admin-pages`)
-- إنشاء/تعديل صفحات قانونية (سياسة خصوصية، شروط، إلخ)
-- محرر نصوص مع دعم HTML
-
-### الإعدادات (`admin-settings`)
-- **هوية العلامة التجارية**: تغيير الشعار والأيقونة واسم الموقع
-- **بوابة الدفع**: إعداد مفاتيح Stripe (مفتاح عام، مفتاح سري، سر الويب هوك)
-- **اختبار الاتصال**: زر اختبار اتصال Stripe
-
----
-
-## 🤝 نظام الإحالات
-
-```
-المستخدم A (المُحيل)
-     │
-     ├── يحصل على كود إحالة فريد: "ahmed2024"
-     ├── يحصل على رابط إحالة: /?ref=ahmed2024
-     │
-     └── يشارك الرابط مع الأصدقاء
-              │
-              ▼
-         المستخدم B (المُحال)
-              │
-              ├── يُسجّل باستخدام رابط الإحالة
-              ├── يُنشأ سجل Referral (حالة PENDING)
-              │
-              └── عند إتمام عملية شراء:
-                   ├── يُحوّل سطر الإحالة إلى COMPLETED
-                   └── يُضاف عمولة للمُحيل في المحفظة
-```
-
-### التفاصيل
-- كود الإحالة: أول جزء من البريد + 5 أحرف عشوائية (مثال: `ahmed5x2k3`)
-- العمولة: 5% من قيمة أول عملية شراء للمُحال
-- تتبع كامل: قائمة بجميع المُحالين مع حالة كل إحالة
-- سجل العمولات: جميع العمولات المكتسبة مع التاريخ والمبلغ
-
----
-
-## 📋 نظام التراخيص الرقمية
-
-6 أنواع تراخيص عالمية مدعومة:
-
-| الترخيص | العربي | اللون | الوصف |
-|---------|--------|-------|-------|
-| `PERSONAL` | شخصي | أخضر | استخدام شخصي فقط |
-| `COMMERCIAL` | تجاري | أزرق | استخدام تجاري في مشاريع واحدة |
-| `EXTENDED` | ممتد | بنفسجي | استخدام في مشاريع متعددة |
-| `RESELLER` | إعادة البيع | برتقالي | إعادة بيع المنتج للعملاء |
-| `ENTERPRISE` | مؤسسي | سماوي | استخدام مؤسسي غير محدود |
-| `PLR` | حقوق تأليف خاصة | وردي | تعديل كامل وإعادة بيع باسمك |
-
----
-
-## 🔒 نظام المصادقة وحفظ الجلسة
-
-### حفظ الجلسة (Session Persistence)
-
-```
-┌─────────────────────────────────────────┐
-│           متصفح العميل                    │
-│  Zustand Store (localStorage persist)    │
-│  ├── currentLang: 'ar' | 'en'           │
-│  ├── user: { id, email, name, role... } │
-│  └── isAdmin: boolean                   │
-├─────────────────────────────────────────┤
-│           httpOnly Cookie                │
-│  token=eyJhbGciOiJIUzI1NiJ9...          │
-│  Path=/; HttpOnly; Secure; SameSite=Lax  │
-│  Max-Age=2592000 (30 يوم)               │
-├─────────────────────────────────────────┤
-│           تحديث الصفحة                    │
-│                                         │
-│  1. <script> مبكر يقرأ اللغة من         │
-│     localStorage ويضع dir + lang        │
-│                                         │
-│  2. AuthInitializer يظهر شاشة تحميل      │
-│                                         │
-│  3. GET /api/auth/me يتحقق من Cookie     │
-│     ويُرجع بيانات المستخدم               │
-│                                         │
-│  4. Zustand يُعيد التفعيل من localStorage│
-│     ويُكمل البيانات من /api/auth/me     │
-└─────────────────────────────────────────┘
-```
-
----
-
-## 🚀 إعداد المشروع
-
-### المتطلبات
+## 🗄️ Database Models (13)
+
+| Model | Description |
+|---|---|
+| **User** | Users with roles (USER/ADMIN), wallet, subscriptions, referral codes |
+| **Product** | Digital products with bilingual titles, prices, license types |
+| **Order** | Purchase records with status tracking |
+| **Referral** | Referral tracking with commission management |
+| **WalletTransaction** | Credit/debit transactions for user wallets |
+| **SiteSetting** | Key-value configuration store |
+| **Page** | Legal pages (Privacy, Terms, About) with bilingual content |
+| **Testimonial** | Customer reviews with ratings |
+| **ContactMessage** | Contact form submissions |
+| **Category** | Product categories with icons and sort order |
+| **PaymentIntent** | Stripe payment tracking with metadata |
+| **Notification** | User notifications with types and read status |
+| **EmailTemplate** | Configurable email templates with bilingual HTML |
+
+## 🎨 Design System
+
+### Brand Colors
+- **Primary Gradient**: `#B01743 → #F61A5A → #FF6B8A`
+- **Secondary**: `#B4CDD3` (Cyan accent)
+- **Dark Background**: `#0F0F1A`
+- **Card Background**: `#1A1A2E`
+- **Text Primary**: `#E8E8F0`
+- **Text Muted**: `#8888A0`
+
+### UI Features
+- Glassmorphism cards (`glass-card` class)
+- Gradient text (`gradient-text` class)
+- Glow effects (`glow-rose`, `glow-cyan`)
+- Animated gradient borders
+- Technology particle background
+- Framer Motion animations (slide, fade, float)
+- Custom scrollbar styling
+
+### RTL/LTR Support
+- Arabic-first (default RTL)
+- Language toggle (AR ↔ EN)
+- Cairo font for Arabic
+- Geist font for English
+- Early script prevents RTL flash on page load
+- `dir="rtl"` / `dir="ltr"` on HTML element
+
+## 📧 Email System
+
+### Architecture
+- **SMTP Transport**: Nodemailer with configurable SMTP (Gmail, custom servers)
+- **Professional Templates**: Dark theme matching the platform identity
+- **Bilingual**: Separate Arabic and English HTML templates
+- **Dynamic Variables**: `{{name}}`, `{{email}}`, `{{amount}}`, `{{productName}}`, `{{plan}}`, `{{commission}}`, `{{referredName}}`
+
+### Email Header
+- Centered ViralLinkUp logo with gradient brand name
+
+### Email Footer
+- "Support Team" signature with support email
+- Links to About, Privacy Policy, Terms & Conditions
+- Copyright notice
+
+### Default Templates (9)
+1. **welcome** - New user welcome email
+2. **purchase_confirmation** - Product purchase receipt
+3. **payment_confirmation** - Generic payment confirmation
+4. **wallet_deposit** - Wallet credit notification
+5. **wallet_withdrawal** - Withdrawal request confirmation
+6. **referral_commission** - New referral earned commission
+7. **subscription_activated** - Subscription plan activated
+8. **subscription_cancelled** - Subscription cancelled
+9. **password_reset** - Password recovery request
+
+### Configuration
+All email settings are configurable from the admin panel:
+- SMTP Host, Port, Secure (TLS/SSL)
+- SMTP Username, Password
+- From Name, From Email
+- Test email sending before going live
+
+## 🔔 Notification System
+
+### Real-Time Bell Icon
+- Badge counter for unread notifications
+- Auto-refresh every 30 seconds
+- Dropdown panel with notification list
+- "Mark all as read" action
+- Individual mark-as-read per notification
+
+### Notification Types
+| Type | Trigger | Icon |
+|---|---|---|
+| **WELCOME** | User registration | Info |
+| **PURCHASE** | Product purchased | ShoppingBag |
+| **PAYMENT** | Payment completed | CreditCard |
+| **WALLET_DEPOSIT** | Wallet credited | CreditCard |
+| **WALLET_WITHDRAW** | Withdrawal requested | CreditCard |
+| **REFERRAL** | New referral joined | Users |
+| **SUBSCRIPTION** | Plan activated | Star |
+| **SUBSCRIPTION_CANCEL** | Plan cancelled | Star |
+| **DOWNLOAD** | Product downloaded | Download |
+| **PASSWORD_RESET** | Password reset requested | AlertCircle |
+
+### Integration Points
+Every user action automatically creates an in-app notification + sends an email:
+- Registration → Welcome notification + email
+- Purchase → Purchase confirmation + email
+- Payment → Payment notification + email
+- Wallet deposit → Deposit notification + email
+- Wallet withdrawal → Withdrawal notification + email
+- Referral → Referral commission notification + email
+- Subscription → Subscription activation notification + email
+- Password reset → Password reset notification + email
+
+## 👨‍💼 Admin Dashboard
+
+### Navigation Sections
+1. **Overview** - Revenue, users, orders, products stats with charts
+2. **Products** - CRUD for digital products with features, images, license types
+3. **Orders** - View all orders with product/user details
+4. **Users** - Manage users, roles, wallet balances
+5. **Categories** - Organize product categories
+6. **Testimonials** - Manage customer reviews
+7. **Pages** - Edit legal pages (Privacy, Terms, About)
+8. **Email & Templates** - SMTP settings, email templates CRUD, test emails
+9. **Settings** - Brand identity (logo, colors), payment gateway (Stripe)
+
+### Email Management Section
+- **Templates Tab**: View, edit, create, toggle, delete email templates
+- **Settings Tab**: Configure SMTP host, port, secure, credentials
+- **Test Tab**: Send test emails to verify SMTP configuration
+
+## 🔗 Referral System
+- Unique referral code per user
+- Shareable referral link
+- Commission tracking (PENDING → COMPLETED)
+- Wallet integration (commissions credited to wallet)
+- Referral statistics dashboard
+
+## 💳 Payment System
+- **Demo Mode**: Simulated payments when Stripe is not configured
+- **Live Mode**: Full Stripe integration with webhook handling
+- **Payment Types**: Product purchase, wallet deposit, subscription
+- **Stripe Webhook Events**: checkout.session.completed, invoice.payment_succeeded, invoice.payment_failed, customer.subscription.deleted
+- **Test Connection**: Verify Stripe API key from admin panel
+- **Multi-currency**: USD, EUR, SAR, AED
+
+## 🔐 Authentication
+- JWT tokens with 30-day expiry
+- httpOnly secure cookies
+- Email + Password login (bcrypt hashed)
+- Google OAuth simulation
+- Session persistence across page refreshes
+- Zustand persist for user preferences
+- Password reset with email notification
+
+## 🌐 License Types
+| Type | Arabic | Use Case |
+|---|---|---|
+| PERSONAL | شخصي | Personal projects |
+| COMMERCIAL | تجاري | Commercial use |
+| EXTENDED | ممتد | Extended commercial |
+| RESELLER | إعادة البيع | Resell the product |
+| ENTERPRISE | مؤسسي | Enterprise/Team |
+| PLR | حقوق تأليف خاصة | Private Label Rights |
+
+## 🚀 Getting Started
+
+### Prerequisites
 - Node.js 18+
-- npm أو bun
+- npm or yarn
 
-### التثبيت
+### Installation
 
 ```bash
-# استنساخ المشروع
-git clone <repo-url>
+# Clone the repository
+git clone https://github.com/your-org/virallinkup.git
 cd virallinkup
 
-# تثبيت الحزم
+# Install dependencies
 npm install
 
-# إعداد قاعدة البيانات
-npx prisma db push
+# Set up environment
+cp .env.example .env
+# Edit .env with your values
 
-# تشغيل بيئة التطوير
+# Initialize database
+npx prisma db push
+npx prisma generate
+
+# Seed database (admin user, categories, products, email templates)
+npx tsx seed.ts
+
+# Start development server
 npm run dev
 ```
 
-### بناء الإنتاج
+### Environment Variables
+See `.env.example` for all available variables.
 
+### Test Accounts
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@virallinkup.com | admin123 |
+| User | user@virallinkup.com | user123 |
+
+### Production Build
 ```bash
 npm run build
 npm start
 ```
 
+## 📊 API Routes (30+)
+
+### Auth
+- `POST /api/auth/login` - Email login
+- `POST /api/auth/register` - Create account
+- `POST /api/auth/logout` - Clear session
+- `GET /api/auth/me` - Get current user
+- `POST /api/auth/google` - Google OAuth
+- `POST /api/auth/forgot-password` - Password reset
+
+### Notifications
+- `GET /api/notifications` - List user notifications (paginated)
+- `GET /api/notifications/unread` - Get unread count
+- `POST /api/notifications/mark-read` - Mark single as read
+- `POST /api/notifications/mark-all-read` - Mark all as read
+
+### Admin
+- `GET/POST /api/admin/products` - List/Create products
+- `DELETE /api/admin/products/[id]` - Delete product
+- `GET /api/admin/users` - List all users
+- `PUT /api/admin/users/[id]` - Update user
+- `GET /api/admin/orders` - List all orders
+- `GET /api/admin/stats` - Dashboard statistics
+- `GET/POST /api/admin/email-templates` - List/Create email templates
+- `PUT/DELETE /api/admin/email-templates/[id]` - Update/Delete template
+- `GET/PUT /api/admin/email-settings` - Get/Set SMTP settings
+- `POST /api/admin/email-test` - Send test email
+
+### Payments
+- `POST /api/payments/create-checkout` - Create Stripe checkout
+- `POST /api/payments/verify` - Verify demo payment
+- `POST /api/payments/webhook` - Stripe webhook
+- `GET /api/payments/history` - User payment history
+- `POST /api/payments/cancel-subscription` - Cancel subscription
+- `POST /api/payments/test-connection` - Test Stripe key
+
+### Public
+- `GET /api/products` - List products (filter, search, paginate)
+- `GET /api/products/[id]` - Product detail
+- `GET/POST /api/categories` - List/Create categories
+- `GET/PUT /api/settings` - Site settings
+- `GET /api/pages/[slug]` - Legal page content
+- `GET /api/testimonials` - Customer testimonials
+- `GET /api/referrals` - User referral data
+
+## 📄 License
+
+MIT License - feel free to use this project for personal or commercial purposes.
+
 ---
 
-## 🔑 الحسابات الافتراضية
-
-| الدور | البريد | كلمة المرور |
-|-------|--------|-------------|
-| **مدير النظام** | admin@virallinkup.com | admin123 |
-| **مستخدم عادي** | user@virallinkup.com | user123 |
-
-بيانات المستخدم التجريبية:
-- رصيد المحفظة: $50
-- كود الإحالة: `ahmed2024`
-- 3 طلبات شراء سابقة
-
----
-
-## ⚙️ متغيرات البيئة
-
-```env
-# قاعدة البيانات
-DATABASE_URL=file:/home/z/my-project/db/custom.db
-
-# Stripe (اختياري - من لوحة تحكم المدير)
-STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# JWT (تلقائي إن لم يُحدد)
-JWT_SECRET=your-secret-key-change-in-production
-```
-
----
-
-## ✅ التحقق من صحة المشروع
-
-```bash
-# فحص الأنماط
-npm run lint
-
-# بناء الإنتاج
-npm run build
-
-# تشغيل قاعدة البيانات
-npx prisma db push
-
-# تشغيل الخادم
-npm run dev
-```
-
-### هيكل الملفات النهائي (بعد التنظيف)
-
-| الفئة | عدد الملفات |
-|-------|-------------|
-| مكونات واجهة المستخدم (`components/`) | 28 |
-| مكونات UI الأساسية (`ui/`) | 5 |
-| مسارات API (`api/`) | 28 |
-| المكتبات (`lib/`) | 6 |
-| الخطافات (`hooks/`) | 1 |
-| **الإجمالي** | **77 ملف** |
-
-### الحزم المُثبّتة: 17 حزمة فقط (بدلاً من 60+ قبل التنظيف)
+Built with ❤️ by ViralLinkUp Team

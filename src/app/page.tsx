@@ -36,6 +36,7 @@ import AdminSettings from '@/components/AdminSettings';
 import AdminCategories from '@/components/AdminCategories';
 import AdminPages from '@/components/AdminPages';
 import AdminTestimonials from '@/components/AdminTestimonials';
+import AdminEmailTemplates from '@/components/AdminEmailTemplates';
 
 function LandingPage() {
   return (
@@ -62,6 +63,7 @@ function AdminContent() {
     case 'admin-categories': return <AdminCategories />;
     case 'admin-pages': return <AdminPages />;
     case 'admin-testimonials': return <AdminTestimonials />;
+    case 'admin-email': return <AdminEmailTemplates />;
     default: return <AdminDashboard />;
   }
 }
@@ -113,6 +115,7 @@ export default function HomePage() {
       case 'admin-categories':
       case 'admin-pages':
       case 'admin-testimonials':
+      case 'admin-email':
         return (
           <AdminLayout>
             <AdminContent />

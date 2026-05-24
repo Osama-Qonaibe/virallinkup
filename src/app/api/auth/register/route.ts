@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { signToken, setTokenCookie } from '@/lib/jwt';
+import { notifyWelcome } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,6 +31,9 @@ export async function POST(request: NextRequest) {
     });
 
     const token = signToken({ userId: user.id, email: user.email, role: user.role });
+
+    // Send welcome notification + email (non-blocking)
+    notifyWelcome(user.id, user.name || email).catch(() => {});
 
     const response = NextResponse.json({
       id: user.id,

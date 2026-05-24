@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { notifyWalletWithdraw } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,6 +28,9 @@ export async function POST(request: NextRequest) {
         description: 'Withdrawal request',
       },
     });
+
+    // Send withdrawal notification (non-blocking)
+    notifyWalletWithdraw(userId, amount).catch(() => {});
 
     return NextResponse.json(transaction);
   } catch (error) {
