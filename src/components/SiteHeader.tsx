@@ -12,7 +12,7 @@ import {
 export default function SiteHeader() {
   const {
     currentPage, currentLang, user, isAdmin,
-    setCurrentPage, setCurrentLang, logout
+    setCurrentPage, setCurrentLang, logout, setUser
   } = useAppStore();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -21,6 +21,13 @@ export default function SiteHeader() {
   const toggleLang = () => {
     const newLang = currentLang === 'ar' ? 'en' : 'ar';
     setCurrentLang(newLang);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
+    logout();
   };
 
   useEffect(() => {
@@ -138,7 +145,7 @@ export default function SiteHeader() {
                         )}
                         <hr className="my-1 border-white/5" />
                         <button
-                          onClick={() => { logout(); setUserMenuOpen(false); setMobileOpen(false); }}
+                          onClick={() => { handleLogout(); setUserMenuOpen(false); setMobileOpen(false); }}
                           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                         >
                           <LogOut className="w-4 h-4" />

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { signToken, setTokenCookie } from '@/lib/jwt';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +10,8 @@ export async function POST(request: NextRequest) {
 
     const existingUser = await db.user.findUnique({ where: { email } });
     if (existingUser) {
-      return NextResponse.json({
+      const token = signToken({ userId: existingUser.id, email: existingUser.email, role: existingUser.role });
+      const response = NextResponse.json({
         id: existingUser.id,
         email: existingUser.email,
         name: existingUser.name,
@@ -17,6 +19,7 @@ export async function POST(request: NextRequest) {
         referralCode: existingUser.referralCode,
         walletBalance: existingUser.walletBalance,
       });
+      return setTokenCookie(response, token);
     }
 
     const user = await db.user.create({
@@ -40,7 +43,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
+    const token = signToken({ userId: user.id, email: user.email, role: user.role });
+
+    const response = NextResponse.json({
       id: user.id,
       email: user.email,
       name: user.name,
@@ -48,6 +53,8 @@ export async function POST(request: NextRequest) {
       referralCode: user.referralCode,
       walletBalance: user.walletBalance,
     });
+
+    return setTokenCookie(response, token);
   } catch (error) {
     return NextResponse.json({ error: 'Google auth failed' }, { status: 500 });
   }

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export type PageName = 
   | 'landing' 
@@ -47,6 +48,7 @@ interface AppState {
   selectedCategorySlug: string | null;
   selectedLegalPage: string | null;
   showDepositModal: boolean;
+  _isRestored: boolean;
 
   setCurrentPage: (page: PageName) => void;
   setCurrentLang: (lang: Language) => void;
@@ -57,25 +59,45 @@ interface AppState {
   setSelectedLegalPage: (slug: string | null) => void;
   setShowDepositModal: (show: boolean) => void;
   logout: () => void;
+  setRestored: () => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
-  currentPage: 'landing',
-  currentLang: 'ar',
-  user: null,
-  isAdmin: false,
-  selectedPackageId: null,
-  selectedCategorySlug: null,
-  selectedLegalPage: null,
-  showDepositModal: false,
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      currentPage: 'landing',
+      currentLang: 'ar',
+      user: null,
+      isAdmin: false,
+      selectedPackageId: null,
+      selectedCategorySlug: null,
+      selectedLegalPage: null,
+      showDepositModal: false,
+      _isRestored: false,
 
-  setCurrentPage: (page) => set({ currentPage: page }),
-  setCurrentLang: (lang) => set({ currentLang: lang }),
-  setUser: (user) => set({ user, isAdmin: user?.role === 'ADMIN' }),
-  setIsAdmin: (isAdmin) => set({ isAdmin }),
-  setSelectedPackageId: (id) => set({ selectedPackageId: id }),
-  setSelectedCategorySlug: (slug) => set({ selectedCategorySlug: slug }),
-  setSelectedLegalPage: (slug) => set({ selectedLegalPage: slug }),
-  setShowDepositModal: (show) => set({ showDepositModal: show }),
-  logout: () => set({ user: null, isAdmin: false, currentPage: 'landing' }),
-}));
+      setCurrentPage: (page) => set({ currentPage: page }),
+      setCurrentLang: (lang) => set({ currentLang: lang }),
+      setUser: (user) => set({ user, isAdmin: user?.role === 'ADMIN' }),
+      setIsAdmin: (isAdmin) => set({ isAdmin }),
+      setSelectedPackageId: (id) => set({ selectedPackageId: id }),
+      setSelectedCategorySlug: (slug) => set({ selectedCategorySlug: slug }),
+      setSelectedLegalPage: (slug) => set({ selectedLegalPage: slug }),
+      setShowDepositModal: (show) => set({ showDepositModal: show }),
+      logout: () => set({ user: null, isAdmin: false, currentPage: 'landing' }),
+      setRestored: () => set({ _isRestored: true }),
+    }),
+    {
+      name: 'virallinkup-store',
+      partialize: (state) => ({
+        currentLang: state.currentLang,
+        user: state.user,
+        isAdmin: state.isAdmin,
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state._isRestored = true;
+        }
+      },
+    }
+  )
+);

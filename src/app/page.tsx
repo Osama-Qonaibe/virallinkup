@@ -5,6 +5,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import TechBackground from '@/components/TechBackground';
 import ScrollToTop from '@/components/ScrollToTop';
+import AuthInitializer from '@/components/AuthInitializer';
 import AdminLayout from '@/components/AdminLayout';
 import HeroSlider from '@/components/HeroSlider';
 import FeaturesSection from '@/components/FeaturesSection';
@@ -123,16 +124,18 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative">
-      <TechBackground />
-      <div className="relative z-10 flex flex-col min-h-screen">
-        <SiteHeader />
-        <main className="flex-1">
-          {renderPage()}
-        </main>
-        {!hideFooter && <SiteFooter />}
+    <AuthInitializer>
+      <div className="min-h-screen flex flex-col relative">
+        <TechBackground />
+        <div className="relative z-10 flex flex-col min-h-screen">
+          <SiteHeader />
+          <main className="flex-1">
+            {renderPage()}
+          </main>
+          {!hideFooter && <SiteFooter />}
+        </div>
+        <ScrollToTop />
       </div>
-      <ScrollToTop />
-    </div>
+    </AuthInitializer>
   );
 }
