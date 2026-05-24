@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getAuthUser } from '@/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
+  const authUser = getAuthUser(request);
+  if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
-    }
-
     const payments = await db.paymentIntent.findMany({
-      where: { userId },
+      where: { userId: authUser.userId },
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
@@ -28,7 +25,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(formatted);
   } catch (error) {
-    console.error('Payment history error:', error);
     return NextResponse.json({ error: 'Failed to fetch payment history' }, { status: 500 });
   }
 }

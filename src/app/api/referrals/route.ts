@@ -1,25 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getAuthUser } from '@/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
+  const authUser = getAuthUser(request);
+  if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const userId = authUser.userId;
 
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID required' }, { status: 400 });
-    }
-
-    const referrals = await db.referral.findMany({
-      where: { referrerId: userId },
-      include: { referred: { select: { name: true, email: true, createdAt: true } } },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    const user = await db.user.findUnique({
-      where: { id: userId },
-      select: { referralCode: true, walletBalance: true },
-    });
+    const [referrals, user] = await Promise.all([
+      db.referral.findMany({
+        where: { referrerId: userId },
+        include: { referred: { select: { name: true, email: true, createdAt: true } } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      db.user.findUnique({
+        where: { id: userId },
+        select: { referralCode: true, walletBalance: true },
+      }),
+    ]);
 
     return NextResponse.json({
       referralCode: user?.referralCode || '',

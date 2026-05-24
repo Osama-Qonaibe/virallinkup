@@ -1,14 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getAuthUser } from '@/lib/admin-auth';
 import { notifyPurchase } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
+  const authUser = getAuthUser(request);
+  if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
-    const { userId, productId, licenseType } = await request.json();
+    const { productId, licenseType } = await request.json();
+    const userId = authUser.userId;
+
+    if (!productId) {
+      return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
+    }
 
     const product = await db.product.findUnique({ where: { id: productId } });
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    const existingOrder = await db.order.findFirst({
+      where: { userId, productId, status: 'COMPLETED' },
+    });
+    if (existingOrder) {
+      return NextResponse.json({ error: 'Product already purchased' }, { status: 400 });
     }
 
     const order = await db.order.create({
@@ -27,13 +43,7 @@ export async function POST(request: NextRequest) {
       data: { downloads: { increment: 1 } },
     });
 
-    // Send purchase notification (non-blocking)
-    notifyPurchase(
-      userId,
-      product.title,
-      product.titleEn || product.title,
-      product.price,
-    ).catch(() => {});
+    notifyPurchase(userId, product.title, product.titleEn || product.title, product.price).catch(() => {});
 
     return NextResponse.json(order);
   } catch (error) {
@@ -42,20 +52,15 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID required' }, { status: 400 });
-    }
+  const authUser = getAuthUser(request);
+  if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  try {
     const orders = await db.order.findMany({
-      where: { userId },
+      where: { userId: authUser.userId },
       include: { product: true },
       orderBy: { createdAt: 'desc' },
     });
-
     return NextResponse.json(orders);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import Stripe from 'stripe';
+import { getAuthUser } from '@/lib/admin-auth';
 
 const PLANS: Record<string, number> = {
   BASIC: 9.99,
@@ -18,17 +19,17 @@ async function getStripeKeys() {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const { type, amount, plan, productId, userId } = await request.json();
+  const authUser = getAuthUser(request);
+  if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    if (!userId || !type) {
-      return NextResponse.json({ error: 'User ID and payment type are required' }, { status: 400 });
-    }
+  try {
+    const { type, amount, plan, productId } = await request.json();
+    const userId = authUser.userId;
+
+    if (!type) return NextResponse.json({ error: 'Payment type is required' }, { status: 400 });
 
     const user = await db.user.findUnique({ where: { id: userId } });
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
     const keys = await getStripeKeys();
     const isDemoMode = !keys.stripe_secret_key || !keys.stripe_publishable_key;
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
 
     let paymentAmount = amount || 0;
-    let metadata: Record<string, string> = {};
+    const metadata: Record<string, string> = {};
 
     if (type === 'subscription' && plan) {
       paymentAmount = PLANS[plan] || 0;
@@ -47,9 +48,7 @@ export async function POST(request: NextRequest) {
       }
     } else if (type === 'purchase' && productId) {
       const product = await db.product.findUnique({ where: { id: productId } });
-      if (!product) {
-        return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-      }
+      if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
       paymentAmount = product.price;
       metadata.productId = productId;
     }
@@ -104,10 +103,7 @@ export async function POST(request: NextRequest) {
               currency,
               unit_amount: amountInCents,
               recurring: { interval: 'month' },
-              product_data: {
-                name: `${plan} Plan - ViralLinkUp`,
-                description: `${plan} subscription plan`,
-              },
+              product_data: { name: `${plan} Plan - ViralLinkUp`, description: `${plan} subscription plan` },
             },
             quantity: 1,
           }]
@@ -117,15 +113,15 @@ export async function POST(request: NextRequest) {
               unit_amount: amountInCents,
               product_data: {
                 name: type === 'deposit' ? 'Wallet Deposit - ViralLinkUp' : 'Product Purchase - ViralLinkUp',
-                description: type === 'deposit' ? `Deposit $${paymentAmount.toFixed(2)} to wallet` : `Purchase product`,
+                description: type === 'deposit' ? `Deposit $${paymentAmount.toFixed(2)} to wallet` : 'Purchase product',
               },
             },
             quantity: 1,
           }],
       metadata: {
         paymentIntentId: paymentIntent.id,
-        type: type,
-        userId: userId,
+        type,
+        userId,
         ...(plan ? { plan } : {}),
         ...(productId ? { productId } : {}),
       },
@@ -147,7 +143,6 @@ export async function POST(request: NextRequest) {
       demoMode: false,
     });
   } catch (error: unknown) {
-    console.error('Checkout error:', error);
     const message = error instanceof Error ? error.message : 'Checkout creation failed';
     return NextResponse.json({ error: message }, { status: 500 });
   }
