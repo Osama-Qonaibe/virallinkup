@@ -5,7 +5,7 @@ import { t } from '@/lib/translations';
 import { useState, useEffect } from 'react';
 import {
   ShoppingCart, Download, Users, Wallet,
-  Package, ArrowLeft, ArrowRight, DollarSign
+  Package, DollarSign
 } from 'lucide-react';
 
 interface DashData {

@@ -2,49 +2,9 @@
 
 import { useAppStore } from '@/lib/store';
 import { t } from '@/lib/translations';
+import { licenseColors, licenseNames, type Product } from '@/lib/constants';
 import { useState, useEffect } from 'react';
 import { Download, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
-
-interface Product {
-  id: string;
-  title: string;
-  titleEn: string | null;
-  description: string;
-  descriptionEn: string | null;
-  price: number;
-  category: string | null;
-  licenseType: string;
-  thumbnailUrl: string | null;
-  downloads: number;
-}
-
-const licenseColors: Record<string, string> = {
-  PERSONAL: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-  COMMERCIAL: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  EXTENDED: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  RESELLER: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-  ENTERPRISE: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-  PLR: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
-};
-
-const licenseNames: Record<string, Record<string, string>> = {
-  ar: {
-    PERSONAL: 'شخصي',
-    COMMERCIAL: 'تجاري',
-    EXTENDED: 'ممتد',
-    RESELLER: 'إعادة البيع',
-    ENTERPRISE: 'مؤسسي',
-    PLR: 'حقوق تأليف خاصة',
-  },
-  en: {
-    PERSONAL: 'Personal',
-    COMMERCIAL: 'Commercial',
-    EXTENDED: 'Extended',
-    RESELLER: 'Reseller',
-    ENTERPRISE: 'Enterprise',
-    PLR: 'PLR',
-  },
-};
 
 export default function PackagesPreview() {
   const { currentLang, setCurrentPage, setSelectedPackageId } = useAppStore();

@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu, X, Globe, ChevronDown, User, LogOut, LayoutDashboard,
-  ShoppingCart, Package, Heart, Settings, Shield
+  ShoppingCart, Heart, Shield
 } from 'lucide-react';
 
 export default function SiteHeader() {

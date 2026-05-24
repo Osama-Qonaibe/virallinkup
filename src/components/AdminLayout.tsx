@@ -5,8 +5,7 @@ import { t } from '@/lib/translations';
 import { useState } from 'react';
 import {
   LayoutDashboard, Package, Users, ShoppingCart, Settings,
-  FileText, MessageSquare, FolderOpen, ChevronLeft, ChevronRight,
-  Menu, X
+  FileText, MessageSquare, FolderOpen, Menu, X
 } from 'lucide-react';
 
 const sidebarItems = [
