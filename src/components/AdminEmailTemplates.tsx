@@ -76,7 +76,7 @@ export default function AdminEmailTemplates() {
     try {
       const res = await fetch('/api/admin/email-templates');
       const data = await res.json();
-      setTemplates(data || []);
+      setTemplates(Array.isArray(data) ? data : []);
     } catch {}
     setLoading(false);
   };
@@ -84,8 +84,9 @@ export default function AdminEmailTemplates() {
   const fetchEmailSettings = async () => {
     try {
       const res = await fetch('/api/admin/email-settings');
+      if (!res.ok) return;
       const data = await res.json();
-      setEmailSettings(data || {});
+      setEmailSettings(data && typeof data === 'object' && !Array.isArray(data) ? data : {});
     } catch {}
   };
 
