@@ -2,18 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAdmin } from '@/lib/admin-auth';
 
-const PUBLIC_KEYS = [
-  'site_name', 'site_name_en', 'site_description', 'site_description_en',
-  'site_logo', 'site_favicon', 'primary_color', 'currency', 'payment_currency',
-  'referral_commission_rate', 'support_email', 'contact_phone', 'social_twitter',
-  'social_instagram', 'social_facebook', 'maintenance_mode',
-];
+export async function GET(request: NextRequest) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
 
-export async function GET() {
   try {
-    const settings = await db.siteSetting.findMany({
-      where: { key: { in: PUBLIC_KEYS } },
-    });
+    const settings = await db.siteSetting.findMany();
     const map: Record<string, string> = {};
     settings.forEach(s => { map[s.key] = s.value || ''; });
     return NextResponse.json(map);
