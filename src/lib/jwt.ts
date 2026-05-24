@@ -5,6 +5,7 @@ if (!process.env.JWT_SECRET) {
 }
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const TOKEN_EXPIRY = '7d';
 
 export interface JWTPayload {
   userId: string;
@@ -13,7 +14,7 @@ export interface JWTPayload {
 }
 
 export function signToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '30d' });
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
 }
 
 export function verifyToken(token: string): JWTPayload | null {
@@ -25,10 +26,11 @@ export function verifyToken(token: string): JWTPayload | null {
 }
 
 export function setTokenCookie(response: Response, token: string) {
+  const isProduction = process.env.NODE_ENV === 'production';
   const headers = new Headers(response.headers);
   headers.append(
     'Set-Cookie',
-    `token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`
+    `token=${token}; Path=/; HttpOnly; ${isProduction ? 'Secure; ' : ''}SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`,
   );
   return new Response(response.body, {
     status: response.status,
@@ -38,12 +40,16 @@ export function setTokenCookie(response: Response, token: string) {
 }
 
 export function clearTokenCookie(): string {
-  return 'token=; Path=/; HttpOnly; Secure; Max-Age=0';
+  return 'token=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0';
 }
 
 export function getTokenFromRequest(request: Request): string | null {
   const cookieHeader = request.headers.get('cookie');
-  if (!cookieHeader) return null;
-  const match = cookieHeader.match(/token=([^;]+)/);
-  return match ? match[1] : null;
+  if (cookieHeader) {
+    const match = cookieHeader.match(/(?:^|;\s*)token=([^;]+)/);
+    if (match) return match[1];
+  }
+  const auth = request.headers.get('authorization');
+  if (auth?.startsWith('Bearer ')) return auth.slice(7);
+  return null;
 }

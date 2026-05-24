@@ -1,12 +1,30 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: "standalone",
-  /* config options here */
+  output: 'standalone',
+  reactStrictMode: true,
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
-  reactStrictMode: false,
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: '**' },
+      { protocol: 'http', hostname: 'localhost' },
+    ],
+  },
+  headers: async () => [
+    {
+      source: '/api/:path*',
+      headers: [
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'X-Frame-Options', value: 'DENY' },
+        { key: 'X-XSS-Protection', value: '1; mode=block' },
+      ],
+    },
+  ],
 };
 
 export default nextConfig;
