@@ -46,6 +46,7 @@ interface AppState {
   selectedPackageId: string | null;
   selectedCategorySlug: string | null;
   selectedLegalPage: string | null;
+  showDepositModal: boolean;
 
   setCurrentPage: (page: PageName) => void;
   setCurrentLang: (lang: Language) => void;
@@ -54,6 +55,7 @@ interface AppState {
   setSelectedPackageId: (id: string | null) => void;
   setSelectedCategorySlug: (slug: string | null) => void;
   setSelectedLegalPage: (slug: string | null) => void;
+  setShowDepositModal: (show: boolean) => void;
   logout: () => void;
 }
 
@@ -65,6 +67,7 @@ export const useAppStore = create<AppState>((set) => ({
   selectedPackageId: null,
   selectedCategorySlug: null,
   selectedLegalPage: null,
+  showDepositModal: false,
 
   setCurrentPage: (page) => set({ currentPage: page }),
   setCurrentLang: (lang) => set({ currentLang: lang }),
@@ -73,5 +76,6 @@ export const useAppStore = create<AppState>((set) => ({
   setSelectedPackageId: (id) => set({ selectedPackageId: id }),
   setSelectedCategorySlug: (slug) => set({ selectedCategorySlug: slug }),
   setSelectedLegalPage: (slug) => set({ selectedLegalPage: slug }),
+  setShowDepositModal: (show) => set({ showDepositModal: show }),
   logout: () => set({ user: null, isAdmin: false, currentPage: 'landing' }),
 }));

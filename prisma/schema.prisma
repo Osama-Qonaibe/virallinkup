@@ -8,22 +8,28 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  name          String?
-  password      String?
-  role          String   @default("USER")
-  avatar        String?
-  referralCode  String   @unique
-  referredBy    String?
-  walletBalance Float    @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  name                 String?
+  password             String?
+  role                 String    @default("USER")
+  avatar               String?
+  referralCode         String    @unique
+  referredBy           String?
+  walletBalance        Float     @default(0)
+  subscriptionPlan     String?
+  subscriptionStatus   String?
+  subscriptionExpiresAt DateTime?
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   orders             Order[]
   referralsMade      Referral[]            @relation("Referrer")
   referralsReceived  Referral[]            @relation("Referred")
   walletTransactions WalletTransaction[]
+  payments           PaymentIntent[]
 }
 
 model Product {
@@ -134,4 +140,18 @@ model Category {
   icon      String?
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
+}
+
+model PaymentIntent {
+  id              String   @id @default(cuid())
+  userId          String
+  stripePaymentId String   @unique
+  amount          Float
+  currency        String   @default("usd")
+  type            String
+  status          String   @default("PENDING")
+  metadata        String?
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }

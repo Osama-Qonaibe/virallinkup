@@ -3,7 +3,7 @@
 import { useAppStore } from '@/lib/store';
 import { t } from '@/lib/translations';
 import { useState, useEffect, useRef } from 'react';
-import { Settings, Upload, Image, Palette, Globe, Save, Check, RotateCcw } from 'lucide-react';
+import { Settings, Upload, Image, Palette, Globe, Save, Check, RotateCcw, CreditCard, Eye, EyeOff, Zap, AlertTriangle } from 'lucide-react';
 
 export default function AdminSettings() {
   const { currentLang } = useAppStore();
@@ -14,6 +14,13 @@ export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState('brand');
   const logoInputRef = useRef<HTMLInputElement>(null);
   const iconInputRef = useRef<HTMLInputElement>(null);
+
+  // Payment state
+  const [showPublishableKey, setShowPublishableKey] = useState(false);
+  const [showSecretKey, setShowSecretKey] = useState(false);
+  const [showWebhookSecret, setShowWebhookSecret] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   useEffect(() => {
     fetch('/api/settings').then(r => r.json()).then(d => { setSettings(d || {}); setLoading(false); }).catch(() => {});
@@ -49,11 +56,35 @@ export default function AdminSettings() {
     }
   };
 
+  const handleTestConnection = async () => {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const res = await fetch('/api/payments/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secretKey: settings.stripe_secret_key }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTestResult({ success: true, message: data.message });
+      } else {
+        setTestResult({ success: false, message: data.error || 'Connection failed' });
+      }
+    } catch {
+      setTestResult({ success: false, message: 'Connection test failed' });
+    }
+    setTesting(false);
+  };
+
+  const isDemoMode = !settings.stripe_secret_key || !settings.stripe_publishable_key;
+
   if (loading) return <div className="flex justify-center py-12"><div className="animate-spin w-6 h-6 border-2 border-[#F61A5A] border-t-transparent rounded-full" /></div>;
 
   const tabs = [
     { key: 'brand', label: currentLang === 'ar' ? 'الهوية البصرية' : 'Brand Identity', icon: Palette },
     { key: 'general', label: currentLang === 'ar' ? 'عام' : 'General', icon: Globe },
+    { key: 'payment', label: t('paymentGateway', currentLang), icon: CreditCard },
   ];
 
   return (
@@ -77,7 +108,7 @@ export default function AdminSettings() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         {tabs.map(tab => {
           const Icon = tab.icon;
           return (
@@ -100,14 +131,12 @@ export default function AdminSettings() {
       {/* Brand Identity Tab */}
       {activeTab === 'brand' && (
         <div className="space-y-6">
-          {/* Logo & Icon Upload */}
           <div className="glass-card rounded-2xl p-6">
             <h2 className="text-base font-semibold text-white mb-5 flex items-center gap-2">
               <Image className="w-4 h-4 text-[#F61A5A]" />
               {currentLang === 'ar' ? 'الشعار والأيقونة' : 'Logo & Icon'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Logo */}
               <div className="space-y-3">
                 <label className="text-xs text-[#8888A0] font-medium">{t('siteLogo', currentLang)}</label>
                 <div className="relative group">
@@ -130,8 +159,6 @@ export default function AdminSettings() {
                   <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, 'siteLogo')} />
                 </div>
               </div>
-
-              {/* Icon / Favicon */}
               <div className="space-y-3">
                 <label className="text-xs text-[#8888A0] font-medium">{t('siteIcon', currentLang)}</label>
                 <div className="relative group">
@@ -157,7 +184,6 @@ export default function AdminSettings() {
             </div>
           </div>
 
-          {/* Colors */}
           <div className="glass-card rounded-2xl p-6">
             <h2 className="text-base font-semibold text-white mb-5 flex items-center gap-2">
               <Palette className="w-4 h-4 text-[#F61A5A]" />
@@ -175,7 +201,7 @@ export default function AdminSettings() {
                     <RotateCcw className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="h-2 rounded-full bg-gradient-to-r from-[#B01743] to-[#F61A5A]" style={{ background: `linear-gradient(to right, ${settings.primaryColor || '#F61A5A'}, ${settings.primaryColor || '#F61A5A'}88)` }} />
+                <div className="h-2 rounded-full" style={{ background: `linear-gradient(to right, ${settings.primaryColor || '#F61A5A'}, ${settings.primaryColor || '#F61A5A'}88)` }} />
               </div>
               <div className="space-y-2">
                 <label className="text-xs text-[#8888A0] font-medium">{t('secondaryColor', currentLang)}</label>
@@ -214,6 +240,211 @@ export default function AdminSettings() {
             <div className="sm:col-span-2 space-y-2">
               <label className="text-xs text-[#8888A0] font-medium">{t('siteDescription', currentLang)}</label>
               <textarea value={settings.siteDescription || ''} onChange={(e) => setSettings({ ...settings, siteDescription: e.target.value })} rows={3} className="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#F61A5A]/50 resize-none" dir={currentLang === 'ar' ? 'rtl' : 'ltr'} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Gateway Tab */}
+      {activeTab === 'payment' && (
+        <div className="space-y-6">
+          {/* Demo Mode Notice */}
+          <div className={`rounded-2xl p-4 border ${isDemoMode ? 'bg-amber-500/10 border-amber-500/30' : 'bg-emerald-500/10 border-emerald-500/30'}`}>
+            <div className="flex items-start gap-3">
+              {isDemoMode ? (
+                <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+              ) : (
+                <Zap className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+              )}
+              <div>
+                <p className={`text-sm font-semibold ${isDemoMode ? 'text-amber-400' : 'text-emerald-400'}`}>
+                  {isDemoMode ? t('demoMode', currentLang) : t('stripeKeys', currentLang)}
+                </p>
+                <p className="text-xs text-[#8888A0] mt-1">
+                  {isDemoMode
+                    ? t('demoModeDesc', currentLang)
+                    : (currentLang === 'ar' ? 'Stripe مفعل - سيتم معالجة المدفوعات عبر Stripe' : 'Stripe is active - Payments will be processed via Stripe')
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Stripe Mode Toggle */}
+          <div className="glass-card rounded-2xl p-6">
+            <h2 className="text-base font-semibold text-white mb-5 flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-[#F61A5A]" />
+              {currentLang === 'ar' ? 'وضع Stripe' : 'Stripe Mode'}
+            </h2>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSettings({ ...settings, stripe_mode: 'test' })}
+                className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  (settings.stripe_mode || 'test') === 'test'
+                    ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                    : 'bg-white/5 text-[#8888A0] border border-white/10 hover:border-white/20'
+                }`}
+              >
+                {t('testMode', currentLang)}
+              </button>
+              <button
+                onClick={() => setSettings({ ...settings, stripe_mode: 'live' })}
+                className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  settings.stripe_mode === 'live'
+                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                    : 'bg-white/5 text-[#8888A0] border border-white/10 hover:border-white/20'
+                }`}
+              >
+                {t('liveMode', currentLang)}
+              </button>
+            </div>
+          </div>
+
+          {/* API Keys */}
+          <div className="glass-card rounded-2xl p-6">
+            <h2 className="text-base font-semibold text-white mb-5 flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-[#F61A5A]" />
+              {currentLang === 'ar' ? 'مفاتيح API' : 'API Keys'}
+            </h2>
+            <div className="space-y-5">
+              {/* Publishable Key */}
+              <div className="space-y-2">
+                <label className="text-xs text-[#8888A0] font-medium">{t('publishableKey', currentLang)}</label>
+                <div className="relative">
+                  <input
+                    type={showPublishableKey ? 'text' : 'password'}
+                    value={settings.stripe_publishable_key || ''}
+                    onChange={(e) => setSettings({ ...settings, stripe_publishable_key: e.target.value })}
+                    placeholder="pk_test_..."
+                    className="w-full py-2.5 px-4 pe-12 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-[#F61A5A]/50 placeholder:text-[#8888A0]/50"
+                    dir="ltr"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPublishableKey(!showPublishableKey)}
+                    className="absolute top-1/2 -translate-y-1/2 end-3 text-[#8888A0] hover:text-white transition-colors"
+                  >
+                    {showPublishableKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Secret Key */}
+              <div className="space-y-2">
+                <label className="text-xs text-[#8888A0] font-medium">{t('secretKey', currentLang)}</label>
+                <div className="relative">
+                  <input
+                    type={showSecretKey ? 'text' : 'password'}
+                    value={settings.stripe_secret_key || ''}
+                    onChange={(e) => setSettings({ ...settings, stripe_secret_key: e.target.value })}
+                    placeholder="sk_test_..."
+                    className="w-full py-2.5 px-4 pe-12 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-[#F61A5A]/50 placeholder:text-[#8888A0]/50"
+                    dir="ltr"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSecretKey(!showSecretKey)}
+                    className="absolute top-1/2 -translate-y-1/2 end-3 text-[#8888A0] hover:text-white transition-colors"
+                  >
+                    {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Webhook Secret */}
+              <div className="space-y-2">
+                <label className="text-xs text-[#8888A0] font-medium">{t('webhookSecret', currentLang)}</label>
+                <div className="relative">
+                  <input
+                    type={showWebhookSecret ? 'text' : 'password'}
+                    value={settings.stripe_webhook_secret || ''}
+                    onChange={(e) => setSettings({ ...settings, stripe_webhook_secret: e.target.value })}
+                    placeholder="whsec_..."
+                    className="w-full py-2.5 px-4 pe-12 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-[#F61A5A]/50 placeholder:text-[#8888A0]/50"
+                    dir="ltr"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowWebhookSecret(!showWebhookSecret)}
+                    className="absolute top-1/2 -translate-y-1/2 end-3 text-[#8888A0] hover:text-white transition-colors"
+                  >
+                    {showWebhookSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Test Connection */}
+          <div className="glass-card rounded-2xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-semibold text-white flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-[#F61A5A]" />
+                  {t('testConnection', currentLang)}
+                </h2>
+                <p className="text-xs text-[#8888A0] mt-1">
+                  {currentLang === 'ar' ? 'تحقق من أن مفاتيح Stripe تعمل بشكل صحيح' : 'Verify your Stripe keys are working correctly'}
+                </p>
+              </div>
+              <button
+                onClick={handleTestConnection}
+                disabled={testing || !settings.stripe_secret_key}
+                className="btn-primary px-5 py-2 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2"
+              >
+                {testing ? (
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                ) : (
+                  <Zap className="w-4 h-4" />
+                )}
+                {testing ? (currentLang === 'ar' ? 'جاري الاختبار...' : 'Testing...') : t('testConnection', currentLang)}
+              </button>
+            </div>
+            {testResult && (
+              <div className={`mt-4 rounded-xl p-3 ${testResult.success ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+                <div className="flex items-center gap-2">
+                  {testResult.success ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      <p className="text-sm text-emerald-400">{t('connectionSuccess', currentLang)}</p>
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="w-4 h-4 text-red-400" />
+                      <p className="text-sm text-red-400">{t('connectionFailed', currentLang)}: {testResult.message}</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Currency */}
+          <div className="glass-card rounded-2xl p-6">
+            <h2 className="text-base font-semibold text-white mb-5 flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-[#F61A5A]" />
+              {currentLang === 'ar' ? 'عملة الدفع' : 'Payment Currency'}
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { value: 'usd', label: 'USD ($)', flag: '🇺🇸' },
+                { value: 'eur', label: 'EUR (€)', flag: '🇪🇺' },
+                { value: 'sar', label: 'SAR (﷼)', flag: '🇸🇦' },
+                { value: 'aed', label: 'AED (د.إ)', flag: '🇦🇪' },
+              ].map(curr => (
+                <button
+                  key={curr.value}
+                  onClick={() => setSettings({ ...settings, payment_currency: curr.value })}
+                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                    (settings.payment_currency || 'usd') === curr.value
+                      ? 'bg-[#F61A5A]/15 text-[#F61A5A] border border-[#F61A5A]/30'
+                      : 'bg-white/5 text-[#8888A0] border border-white/10 hover:border-white/20'
+                  }`}
+                >
+                  <span>{curr.flag}</span>
+                  {curr.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
