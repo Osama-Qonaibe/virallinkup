@@ -1,6 +1,10 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'virallinkup-super-secret-key-change-in-production-2024';
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export interface JWTPayload {
   userId: string;
@@ -21,11 +25,10 @@ export function verifyToken(token: string): JWTPayload | null {
 }
 
 export function setTokenCookie(response: Response, token: string) {
-  const isProduction = process.env.NODE_ENV === 'production';
   const headers = new Headers(response.headers);
   headers.append(
     'Set-Cookie',
-    `token=${token}; Path=/; HttpOnly; Secure=${isProduction}; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`
+    `token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`
   );
   return new Response(response.body, {
     status: response.status,
@@ -35,7 +38,7 @@ export function setTokenCookie(response: Response, token: string) {
 }
 
 export function clearTokenCookie(): string {
-  return 'token=; Path=/; HttpOnly; Max-Age=0';
+  return 'token=; Path=/; HttpOnly; Secure; Max-Age=0';
 }
 
 export function getTokenFromRequest(request: Request): string | null {

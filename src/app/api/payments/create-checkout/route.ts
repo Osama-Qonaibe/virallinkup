@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
     const keys = await getStripeKeys();
     const isDemoMode = !keys.stripe_secret_key || !keys.stripe_publishable_key;
     const currency = keys.payment_currency || 'usd';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
 
     let paymentAmount = amount || 0;
     let metadata: Record<string, string> = {};
@@ -57,11 +58,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid payment amount' }, { status: 400 });
     }
 
-    // Store amount in cents for internal consistency
     const amountInCents = Math.round(paymentAmount * 100);
     const simulatedPaymentId = `demo_pi_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
-    // Create PaymentIntent record
     const paymentIntent = await db.paymentIntent.create({
       data: {
         userId,
@@ -75,7 +74,6 @@ export async function POST(request: NextRequest) {
     });
 
     if (isDemoMode) {
-      // Demo mode: return a simulated checkout URL
       return NextResponse.json({
         sessionId: paymentIntent.id,
         paymentIntentId: paymentIntent.id,
@@ -84,10 +82,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Live mode: create real Stripe checkout session
     const stripe = new Stripe(keys.stripe_secret_key, { apiVersion: '2025-04-30.basil' });
 
-    // Create or retrieve Stripe customer
     let customerId = user.stripeCustomerId;
     if (!customerId) {
       const customer = await stripe.customers.create({
@@ -133,13 +129,12 @@ export async function POST(request: NextRequest) {
         ...(plan ? { plan } : {}),
         ...(productId ? { productId } : {}),
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || ''}/?payment=success&sessionId={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || ''}/?payment=cancelled`,
+      success_url: `${siteUrl}/?payment=success&sessionId={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl}/?payment=cancelled`,
     };
 
     const session = await stripe.checkout.sessions.create(sessionParams);
 
-    // Update PaymentIntent with real Stripe session ID
     await db.paymentIntent.update({
       where: { id: paymentIntent.id },
       data: { stripePaymentId: session.id },

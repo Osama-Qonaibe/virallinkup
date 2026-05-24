@@ -12,7 +12,7 @@ async function getStripeKeys() {
   return map;
 }
 
-async function completePayment(paymentIntentId: string, stripePaymentId: string) {
+async function completePayment(paymentIntentId: string, stripePaymentId: string, stripeSubscriptionId?: string) {
   const payment = await db.paymentIntent.findUnique({ where: { id: paymentIntentId } });
   if (!payment) return;
 
@@ -47,6 +47,7 @@ async function completePayment(paymentIntentId: string, stripePaymentId: string)
         subscriptionPlan: plan,
         subscriptionStatus: 'ACTIVE',
         subscriptionExpiresAt: expiresAt,
+        ...(stripeSubscriptionId ? { stripeSubscriptionId } : {}),
       },
     });
     notifySubscription(payment.userId, plan).catch(() => {});
@@ -92,7 +93,6 @@ export async function POST(request: NextRequest) {
     if (isDemoMode) {
       const body = await request.json();
       const { event } = body;
-
       if (event === 'checkout.session.completed') {
         const { paymentIntentId, stripePaymentId } = body;
         if (paymentIntentId) {
@@ -107,7 +107,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    // Live mode
     const stripe = new Stripe(keys.stripe_secret_key, { apiVersion: '2025-04-30.basil' });
     const sig = request.headers.get('stripe-signature');
 
@@ -131,8 +130,9 @@ export async function POST(request: NextRequest) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       const paymentIntentId = session.metadata?.paymentIntentId;
+      const stripeSubscriptionId = typeof session.subscription === 'string' ? session.subscription : undefined;
       if (paymentIntentId) {
-        await completePayment(paymentIntentId, session.id);
+        await completePayment(paymentIntentId, session.id, stripeSubscriptionId);
       }
     } else if (event.type === 'invoice.payment_succeeded') {
       const invoice = event.data.object as Stripe.Invoice;
@@ -145,9 +145,14 @@ export async function POST(request: NextRequest) {
         if (user) {
           const expiresAt = new Date();
           expiresAt.setMonth(expiresAt.getMonth() + 1);
+          const subId = typeof invoice.subscription === 'string' ? invoice.subscription : undefined;
           await db.user.update({
             where: { id: user.id },
-            data: { subscriptionStatus: 'ACTIVE', subscriptionExpiresAt: expiresAt },
+            data: {
+              subscriptionStatus: 'ACTIVE',
+              subscriptionExpiresAt: expiresAt,
+              ...(subId ? { stripeSubscriptionId: subId } : {}),
+            },
           });
         }
       }
@@ -174,7 +179,7 @@ export async function POST(request: NextRequest) {
         if (user && user.subscriptionPlan) {
           await db.user.update({
             where: { id: user.id },
-            data: { subscriptionStatus: 'CANCELLED' },
+            data: { subscriptionStatus: 'CANCELLED', stripeSubscriptionId: null },
           });
           notifySubscriptionCancel(user.id, user.subscriptionPlan).catch(() => {});
         }

@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export async function POST(request: NextRequest) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   try {
     const body = await request.json();
     const { id, ...data } = body;
@@ -47,7 +51,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   try {
     const products = await db.product.findMany({
       orderBy: { createdAt: 'desc' },
