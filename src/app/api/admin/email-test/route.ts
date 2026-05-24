@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail, testEmailConnection } from '@/lib/email';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export async function POST(request: NextRequest) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   try {
     const { to, subject, message } = await request.json();
     if (!to || !subject) {
