@@ -94,7 +94,6 @@ virallinkup/
 │   │       └── wallet/       # withdraw
 │   └── hooks/
 │       └── use-toast.ts
-├── .env                       # Environment variables (gitignored)
 ├── .env.example               # Environment template
 ├── .gitignore
 ├── package.json
@@ -156,14 +155,6 @@ virallinkup/
 - **Bilingual**: Separate Arabic and English HTML templates
 - **Dynamic Variables**: `{{name}}`, `{{email}}`, `{{amount}}`, `{{productName}}`, `{{plan}}`, `{{commission}}`, `{{referredName}}`
 
-### Email Header
-- Centered ViralLinkUp logo with gradient brand name
-
-### Email Footer
-- "Support Team" signature with support email
-- Links to About, Privacy Policy, Terms & Conditions
-- Copyright notice
-
 ### Default Templates (9)
 1. **welcome** - New user welcome email
 2. **purchase_confirmation** - Product purchase receipt
@@ -205,17 +196,6 @@ All email settings are configurable from the admin panel:
 | **DOWNLOAD** | Product downloaded | Download |
 | **PASSWORD_RESET** | Password reset requested | AlertCircle |
 
-### Integration Points
-Every user action automatically creates an in-app notification + sends an email:
-- Registration → Welcome notification + email
-- Purchase → Purchase confirmation + email
-- Payment → Payment notification + email
-- Wallet deposit → Deposit notification + email
-- Wallet withdrawal → Withdrawal notification + email
-- Referral → Referral commission notification + email
-- Subscription → Subscription activation notification + email
-- Password reset → Password reset notification + email
-
 ## 👨‍💼 Admin Dashboard
 
 ### Navigation Sections
@@ -228,11 +208,6 @@ Every user action automatically creates an in-app notification + sends an email:
 7. **Pages** - Edit legal pages (Privacy, Terms, About)
 8. **Email & Templates** - SMTP settings, email templates CRUD, test emails
 9. **Settings** - Brand identity (logo, colors), payment gateway (Stripe)
-
-### Email Management Section
-- **Templates Tab**: View, edit, create, toggle, delete email templates
-- **Settings Tab**: Configure SMTP host, port, secure, credentials
-- **Test Tab**: Send test emails to verify SMTP configuration
 
 ## 🔗 Referral System
 - Unique referral code per user
@@ -277,36 +252,18 @@ Every user action automatically creates an in-app notification + sends an email:
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/virallinkup.git
+git clone https://github.com/Osama-Qonaibe/virallinkup.git
 cd virallinkup
-
-# Install dependencies
 npm install
-
-# Set up environment
 cp .env.example .env
-# Edit .env with your values
-
-# Initialize database
 npx prisma db push
 npx prisma generate
-
-# Seed database (admin user, categories, products, email templates)
 npx tsx seed.ts
-
-# Start development server
 npm run dev
 ```
 
 ### Environment Variables
 See `.env.example` for all available variables.
-
-### Test Accounts
-| Role | Email | Password |
-|---|---|---|
-| Admin | admin@virallinkup.com | admin123 |
-| User | user@virallinkup.com | user123 |
 
 ### Production Build
 ```bash
